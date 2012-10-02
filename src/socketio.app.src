@@ -1,0 +1,17 @@
+{application, socketio,
+ [
+  {description, ""},
+  {vsn, "1.1"},
+  {registered, []},
+  {agner, [{requires, ["misultin", "ossp_uuid",{"jsx","0.9.0"},"proper","ex_uri", "gproc"]}]},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  gproc,
+                  misultin
+                 ]},
+  {mod, { socketio_app, []}},
+  {env, [{heartbeat_interval, 10000},
+         {close_timeout, 8000},
+         {polling_duration, 20000}]}
+ ]}.
