@@ -65,9 +65,3 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Contributing
 
 Keep changes small and tied to the project that is already present in this repository. For code changes, document the toolchain used, avoid committing generated dependency directories or local configuration, and update this README when setup or verification steps change.
-
-## Existing Project Notes
-
-Prior README summary:
-
-> earling-web-sockets Socket.IO for Erlang ==================== Socket.IO [Socket.IO](http://socket.io/) aims to make live apps possible in every browser and mobile device, blurring the differences between the different transport mechanisms. What is socket.io for Erlang? Socket.IO-erlang is a full-blown socket.io server reimplementation in
