@@ -1,59 +1,71 @@
 # earling-web-sockets
 
-<!-- README-OVERVIEW-IMAGE -->
-![Project overview](docs/readme-overview.svg)
+## Overview
 
-Socket.IO for Erlang
-====================
+`garethpaul/earling-web-sockets` is a static web project. socket-io for earling
 
-## Socket.IO
+This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project language mix found during review was: no dominant source language detected.
 
-[Socket.IO](http://socket.io/) aims to make live apps possible in every browser and mobile device, blurring the differences between the different transport mechanisms.
+## Repository Contents
 
-## What is socket.io for Erlang?
+- `README.md` - project overview and local usage notes
+- `demo` - source or example code
+- `Makefile` - local build or utility targets
+- `SECURITY.md` - security reporting and disclosure guidance
+- `VISION.md` - project direction and maintenance guardrails
 
-Socket.IO-erlang is a full-blown socket.io server reimplementation in
-Erlang that is fully compatible with socket.io's javascript client
-library.
+Additional scan context:
 
-## How to use
+- Source directories: demo
+- Dependency and build manifests: Makefile
+- Entry points or build surfaces: Makefile
+- Test-looking files: no obvious test files detected
 
-For the time being, take a look at demo/demo.erl
+## Getting Started
 
-## Building
+### Prerequisites
 
-Depending on a way you have your Erlang distribution installed, you might need crypto/ssl support in Erlang or you will get errors like this:
+- Git
 
-    Uncaught error in rebar_core: {'EXIT',
-                                      {undef,
-                                          [{crypto,start,[]},
-                                           {rebar,run_aux,1},
-                                           {rebar,main,1},
-                                           {escript,run,2},
-                                           {escript,start,1},
-                                           {init,start_it,1},
-                                           {init,start_em,1}]}}
-    make: *** [deps] Error 1
+### Setup
 
-see [https://github.com/basho/riak_wiki/issues/45](https://github.com/basho/riak_wiki/issues/45)
+```bash
+git clone https://github.com/garethpaul/earling-web-sockets.git
+cd earling-web-sockets
+```
 
-### OSX: 
-If you use MacPorts to install Erlang instead of Homebrew or manual builds, this is how you install SSL for Erlang:
+The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
 
-    sudo port install erlang +ssl
+## Running or Using the Project
 
-### Linux
-Make sure you have the erlang-crypto and erlang-dev packages installed if you're on Debian, erlang-crypto and erlang-devel on Redhat/Fedora. Or better yet, consider building
-your Erlang manually, as Erlang packages in Linux distros tend to be
-either outdated or broken. Or both.
+- Run `make` or inspect `Makefile` for available targets.
 
-## Roadmap
-Socket.io-erlang has entered maintenance mode. The original [socket.io](http://socket.io) library has been upgraded to version 0.7.x (and the oddly similar version 0.8.x), which is incompatible with major ways with the 0.6.x versions that socket.io-erlang implements. The latest versions took more and more the shape of an entire framework that breaks backwards compatibility on the client-side as well as the server side, which the current socket.io-erlang team of maintainers disagree with.
+## Testing and Verification
 
-Because of this, we will be keeping the socket.io-erlang features as they are. We will still maintain the application and try to fix all issues and bugs to keep it working, but the development itself will be suspended.
+- `make test` if the Makefile defines that target
 
-## TODO
+When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
-- License
-- How can I contribute?
-- Known Issues
+## Configuration and Secrets
+
+- No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
+
+## Security and Privacy Notes
+
+- Review changes touching network requests, sockets, or service endpoints; examples from the scan include demo/index.html, demo/index_ssl.html, rebar.config.
+
+## Maintenance Notes
+
+- See `SECURITY.md` for vulnerability reporting and safe research guidance.
+- See `VISION.md` for project direction and contribution guardrails.
+
+## Contributing
+
+Keep changes small and tied to the project that is already present in this repository. For code changes, document the toolchain used, avoid committing generated dependency directories or local configuration, and update this README when setup or verification steps change.
+
+## Existing Project Notes
+
+Prior README summary:
+
+> earling-web-sockets <!-- README-OVERVIEW-IMAGE --> Socket.IO for Erlang ==================== Socket.IO [Socket.IO](http://socket.io/) aims to make live apps possible in every browser and mobile device, blurring the differences between the different transport mechanisms. What is socket.io for Erlang? Socket.IO-erlang is a full-blown socket.io server reimplementation in
+
