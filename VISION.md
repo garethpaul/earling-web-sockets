@@ -45,3 +45,6 @@ defaults for real deployments.
 - Production credential material
 - SSL or transport changes without test/demo verification
 - Changes that remove maintenance-mode context from the README
+
+This list is a roadmap guardrail, not a permanent rule.
+Strong user demand and strong technical rationale can change it.
