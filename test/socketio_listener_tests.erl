@@ -21,4 +21,9 @@ all_at_port_allowed_origins_test() ->
 port_default_origins_test() ->
     ?assertEqual(true, socketio_listener:verify_origin("http://foo.bar",[{"a",80},{"*",80}])).
 
+malformed_origin_rejected_test() ->
+    ?assertEqual(false, socketio_listener:verify_origin("not a url",[{"*","*"}])).
+
+relative_origin_rejected_test() ->
+    ?assertEqual(false, socketio_listener:verify_origin("/socket.io/1",[{"*","*"}])).
 

@@ -22,6 +22,18 @@ Priority:
 - Maintain demo and test coverage around transports
 - Avoid broad protocol rewrites without a compatibility plan
 
+Current baseline:
+
+- `make deps`, `make`, and `make test` now verify `erl` and `escript` before
+  invoking legacy `rebar`.
+- `scripts/check-baseline.sh` runs full rebar tests when Erlang/OTP is
+  available and static maintenance checks otherwise.
+- Malformed or relative Origin values fail closed instead of crashing listener
+  origin checks.
+- The non-SSL demo starts each listener port once so local demo behavior stays
+  predictable.
+- Demo SSL certificates are documented as test-only local demo material.
+
 Next priorities:
 
 - Add clear maintenance-status and supported-client notes
@@ -32,7 +44,7 @@ Next priorities:
 Contribution rules:
 
 - One PR = one focused transport, build, test, or documentation change.
-- Run the relevant Makefile/rebar test path before pushing Erlang changes.
+- Run `scripts/check-baseline.sh` before pushing Erlang or build changes.
 - Preserve old protocol compatibility unless a migration note explains the break.
 - Keep demo certificates clearly marked as test-only.
 

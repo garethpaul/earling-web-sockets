@@ -1,5 +1,7 @@
-ebin/socketio.app
-ebin/*.beam
-deps
-.eunit
+/.eunit/
+/deps/
+/ebin/
+/logs/
+/priv/Socket.IO/
 .agner.config
+erl_crash.dump

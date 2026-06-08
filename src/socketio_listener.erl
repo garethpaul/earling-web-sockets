@@ -64,8 +64,13 @@ origins(Server, Origins) ->
     gen_server:call(Server, {origins, Origins}).
 
 verify_origin(Origin, Origins) ->
-    {ok, #ex_uri{ authority = #ex_uri_authority{ host = Host, port = Port } } = _URI, _} = ex_uri:decode(Origin),
-    verify_origin_1({Host, Port}, Origins).
+    case catch ex_uri:decode(Origin) of
+        {ok, #ex_uri{ authority = #ex_uri_authority{ host = Host, port = Port } }, _}
+          when Host =/= undefined, Host =/= "" ->
+            verify_origin_1({Host, Port}, Origins);
+        _ ->
+            false
+    end.
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -185,4 +190,3 @@ verify_origin_1(Origin, [_|Rest]) ->
     verify_origin_1(Origin, Rest);
 verify_origin_1(_Origin, []) ->
     false.
-
