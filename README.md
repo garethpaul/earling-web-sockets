@@ -1,3 +1,8 @@
+# earling-web-sockets
+
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 Socket.IO for Erlang
 ====================
 
