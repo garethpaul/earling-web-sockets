@@ -1,5 +1,8 @@
 # earling-web-sockets
 
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 ## Overview
 
 `garethpaul/earling-web-sockets` is a static web project. socket-io for earling
@@ -68,4 +71,3 @@ Keep changes small and tied to the project that is already present in this repos
 Prior README summary:
 
 > earling-web-sockets <!-- README-OVERVIEW-IMAGE --> Socket.IO for Erlang ==================== Socket.IO [Socket.IO](http://socket.io/) aims to make live apps possible in every browser and mobile device, blurring the differences between the different transport mechanisms. What is socket.io for Erlang? Socket.IO-erlang is a full-blown socket.io server reimplementation in
-
