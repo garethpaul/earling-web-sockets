@@ -1,5 +1,8 @@
 ## Earling Web Sockets Vision
 
+This document explains the current state and direction of the project.
+Project overview and developer docs: [`README.md`](README.md)
+
 Earling Web Sockets is an Erlang Socket.IO server implementation sample based on
 the socket.io-erlang codebase.
 
