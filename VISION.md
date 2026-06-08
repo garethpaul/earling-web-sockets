@@ -39,7 +39,7 @@ Socket servers and SSL demos need clear boundaries. Test certificates must not
 be used as production credentials, and server changes should avoid unsafe
 defaults for real deployments.
 
-## What We Will Not Merge For Now
+## What We Will Not Merge (For Now)
 
 - Modern Socket.IO rewrites without a protocol compatibility plan
 - Production credential material
