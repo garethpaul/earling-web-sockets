@@ -295,7 +295,12 @@ send_message(Message, Req, Index, ServerModule, Sup) ->
 	{false, _} ->
 	    apply(ServerModule, respond, [Req, 200, "alert('Cross domain security restrictions not met');"]);
 	{_, Headers0} ->
-	    send_message_1([Headers0|Headers], Message, Req, Index, ServerModule)
+	    case safe_jsonp_index(Index) of
+		false ->
+		    apply(ServerModule, respond, [Req, 400, "invalid jsonp index"]);
+		SafeIndex ->
+		    send_message_1([Headers0|Headers], Message, Req, SafeIndex, ServerModule)
+	    end
 	end.
 
 send_message_1(Headers, Message, Req, Index, ServerModule) ->
@@ -303,6 +308,23 @@ send_message_1(Headers, Message, Req, Index, ServerModule) ->
     Message0 = unicode:characters_to_list(jsx:format(jsx:term_to_json(list_to_binary(Message), [{strict, false}]))),
     Message1 = "io.JSONP["++Index++"]._(\"" ++ escape(tl(Message0)) ++ ");",
     apply(ServerModule, respond, [Req, 200, Headers0, Message1]).
+
+safe_jsonp_index(Index) when is_list(Index), Index =/= [] ->
+    case jsonp_index_digits(Index) of
+	true ->
+	    Index;
+	false ->
+	    false
+    end;
+safe_jsonp_index(_) ->
+    false.
+
+jsonp_index_digits([Digit|Rest]) when Digit >= $0, Digit =< $9 ->
+    jsonp_index_digits(Rest);
+jsonp_index_digits([]) ->
+    true;
+jsonp_index_digits(_) ->
+    false.
 
 cors_headers(Headers, Sup) ->
     case proplists:get_value('Origin', Headers) of
@@ -346,5 +368,14 @@ stale_polling_timer_is_ignored_test() ->
     State = #state{ connection_reference = {'xhr-polling', connected},
                     polling_duration = {CurrentRef, 10000} },
     ?assertEqual({noreply, State}, handle_info({timeout, StaleRef, polling}, State)).
+
+jsonp_index_allows_digits_test() ->
+    ?assertEqual("12", safe_jsonp_index("12")).
+
+jsonp_index_rejects_script_characters_test() ->
+    ?assertEqual(false, safe_jsonp_index("0];alert(1)//")).
+
+jsonp_index_rejects_empty_values_test() ->
+    ?assertEqual(false, safe_jsonp_index("")).
 
 -endif.

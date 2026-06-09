@@ -62,6 +62,8 @@ Socket.IO 0.6 client branch used by the demos.
   crashing transport handlers.
 - Long-polling heartbeat and polling timeout handlers ignore stale timer
   references after timers are reset.
+- Polling JSONP callback indexes must be non-empty digits before the JavaScript
+  response wrapper is built.
 
 ## Testing and Verification
 
@@ -99,6 +101,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Malformed or relative Origin values are rejected before transport handlers
   apply the configured origin allow-list.
 - Malformed Socket.IO frame input fails closed during decode.
+- Polling JSONP callback indexes are validated before response construction.
 - This code targets old Socket.IO clients. Do not present it as a modern
   production Socket.IO server without a protocol and security review.
 
@@ -112,6 +115,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   tracked demo SSL fixture boundary.
 - See `docs/plans/2026-06-09-earling-longpoll-timer-refs.md` for the
   long-polling timer reference guard.
+- See `docs/plans/2026-06-09-earling-jsonp-index-guard.md` for the polling
+  JSONP callback index guard.
 - See `docs/plans/2026-06-09-earling-malformed-frame-decode.md` for malformed
   frame decode handling.
 

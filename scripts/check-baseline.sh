@@ -13,6 +13,7 @@ HEARTBEAT_PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-websocket-heartbeat-time
 CREDENTIAL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-demo-credential-boundary.md"
 LONGPOLL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-longpoll-timer-refs.md"
 FRAME_DECODE_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-malformed-frame-decode.md"
+JSONP_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-guard.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -39,6 +40,7 @@ for path in \
   ".gitmodules" \
   "CHANGES.md" \
   "docs/plans/2026-06-09-earling-demo-credential-boundary.md" \
+  "docs/plans/2026-06-09-earling-jsonp-index-guard.md" \
   "docs/plans/2026-06-09-earling-longpoll-timer-refs.md" \
   "docs/plans/2026-06-09-earling-malformed-frame-decode.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
@@ -162,6 +164,13 @@ if ! grep -Fq "stale_polling_timer_is_ignored_test" "$POLLING" ||
   exit 1
 fi
 
+if ! grep -Fq "safe_jsonp_index(Index)" "$POLLING" ||
+  ! grep -Fq "invalid jsonp index" "$POLLING" ||
+  ! grep -Fq "jsonp_index_rejects_script_characters_test" "$POLLING"; then
+  printf '%s\n' "polling JSONP responses must validate callback indexes before response construction." >&2
+  exit 1
+fi
+
 if ! grep -Fq "try header(Str)" "$DATA" ||
   ! grep -Fq "malformed_frame_returns_empty_list_test" "$DATA" ||
   ! grep -Fq "truncated_frame_returns_empty_list_test" "$DATA" ||
@@ -208,6 +217,16 @@ fi
 
 if ! grep -Fq "status: completed" "$FRAME_DECODE_PLAN"; then
   printf '%s\n' "Malformed frame decode plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$JSONP_PLAN"; then
+  printf '%s\n' "JSONP index guard plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "make check" "$JSONP_PLAN"; then
+  printf '%s\n' "JSONP index guard plan must record make check verification." >&2
   exit 1
 fi
 

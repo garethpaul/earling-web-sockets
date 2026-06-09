@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Restricted polling JSONP callback indexes to non-empty digit strings before
+  constructing JavaScript responses.
 - Made malformed Socket.IO frame decode fail closed to an empty message list.
 - Ignored stale heartbeat and polling timeout references in long-polling
   transports after timers are reset.
