@@ -58,6 +58,8 @@ Socket.IO 0.6 client branch used by the demos.
   `demo/test_privkey.pem` are test-only material for local SSL demos.
 - Malformed or relative Origin values are rejected before transport handlers
   apply the configured origin allow-list.
+- Malformed Socket.IO frames decode to an empty message list instead of
+  crashing transport handlers.
 - Long-polling heartbeat and polling timeout handlers ignore stale timer
   references after timers are reset.
 
@@ -96,6 +98,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
   broad origins unless callers provide a narrower `origins` option.
 - Malformed or relative Origin values are rejected before transport handlers
   apply the configured origin allow-list.
+- Malformed Socket.IO frame input fails closed during decode.
 - This code targets old Socket.IO clients. Do not present it as a modern
   production Socket.IO server without a protocol and security review.
 
@@ -109,6 +112,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   tracked demo SSL fixture boundary.
 - See `docs/plans/2026-06-09-earling-longpoll-timer-refs.md` for the
   long-polling timer reference guard.
+- See `docs/plans/2026-06-09-earling-malformed-frame-decode.md` for malformed
+  frame decode handling.
 
 ## Contributing
 

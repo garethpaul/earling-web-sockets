@@ -12,8 +12,10 @@ CHECK_PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-check-wrapper.md"
 HEARTBEAT_PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md"
 CREDENTIAL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-demo-credential-boundary.md"
 LONGPOLL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-longpoll-timer-refs.md"
+FRAME_DECODE_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-malformed-frame-decode.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
+DATA="$ROOT_DIR/src/socketio_data.erl"
 WEBSOCKET="$ROOT_DIR/src/socketio_transport_websocket.erl"
 XHR_MULTIPART="$ROOT_DIR/src/socketio_transport_xhr_multipart.erl"
 HTMLFILE="$ROOT_DIR/src/socketio_transport_htmlfile.erl"
@@ -28,6 +30,7 @@ for path in \
   "rebar.config" \
   ".gitignore" \
   "src/socketio.app.src" \
+  "src/socketio_data.erl" \
   "src/socketio_listener.erl" \
   "src/socketio_transport_websocket.erl" \
   "demo/demo.erl" \
@@ -37,6 +40,7 @@ for path in \
   "CHANGES.md" \
   "docs/plans/2026-06-09-earling-demo-credential-boundary.md" \
   "docs/plans/2026-06-09-earling-longpoll-timer-refs.md" \
+  "docs/plans/2026-06-09-earling-malformed-frame-decode.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -52,8 +56,9 @@ if ! grep -Fq "Erlang/OTP" "$README" ||
   ! grep -Fq "make test" "$README" ||
   ! grep -Fq "Socket.IO 0.6" "$README" ||
   ! grep -Fq "test-only" "$README" ||
+  ! grep -Fq "Malformed Socket.IO frames" "$README" ||
   ! grep -Fq "Malformed or relative Origin values" "$README"; then
-  printf '%s\n' "README must document Erlang, escript, tests, legacy Socket.IO scope, demo certificate status, and Origin handling." >&2
+  printf '%s\n' "README must document Erlang, escript, tests, legacy Socket.IO scope, demo certificate status, frame decode, and Origin handling." >&2
   exit 1
 fi
 
@@ -157,6 +162,14 @@ if ! grep -Fq "stale_polling_timer_is_ignored_test" "$POLLING" ||
   exit 1
 fi
 
+if ! grep -Fq "try header(Str)" "$DATA" ||
+  ! grep -Fq "malformed_frame_returns_empty_list_test" "$DATA" ||
+  ! grep -Fq "truncated_frame_returns_empty_list_test" "$DATA" ||
+  ! grep -Fq "invalid_json_frame_returns_empty_list_test" "$DATA"; then
+  printf '%s\n' "socketio_data must fail closed for malformed frame decode input." >&2
+  exit 1
+fi
+
 demo_port_count=$(grep -Fc "{http_port, 7878}" "$DEMO" || true)
 if [ "$demo_port_count" -ne 1 ]; then
   printf '%s\n' "demo/demo.erl must start the 7878 listener exactly once." >&2
@@ -190,6 +203,16 @@ fi
 
 if ! grep -Fq "status: completed" "$LONGPOLL_PLAN"; then
   printf '%s\n' "Long-poll timer reference plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$FRAME_DECODE_PLAN"; then
+  printf '%s\n' "Malformed frame decode plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "make check" "$FRAME_DECODE_PLAN"; then
+  printf '%s\n' "Malformed frame decode plan must record make check verification." >&2
   exit 1
 fi
 

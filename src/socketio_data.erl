@@ -33,7 +33,11 @@ encode(#heartbeat{ index = Index }) ->
     ?FRAME ++ Length ++ ?FRAME ++ ?HEARTBEAT_FRAME ++ String.
 
 decode(#msg{content=Str}) when is_list(Str) ->
-    header(Str).
+    try header(Str)
+    catch
+        _:_ ->
+            []
+    end.
 
 header(?FRAME ++ Rest) ->
     header(Rest, []).
@@ -91,5 +95,14 @@ json_encoding_test() ->
     Data = encode(Msg),
     [X] = decode(#msg{content=Data}),
     ?assertMatch(#msg{content=JSON, json=true}, X).
+
+malformed_frame_returns_empty_list_test() ->
+    ?assertEqual([], decode(#msg{content="not a socket.io frame"})).
+
+truncated_frame_returns_empty_list_test() ->
+    ?assertEqual([], decode(#msg{content="~m~20~m~short"})).
+
+invalid_json_frame_returns_empty_list_test() ->
+    ?assertEqual([], decode(#msg{content="~m~4~m~~j~{"})).
 
 -endif.

@@ -2,6 +2,7 @@
 
 ## 2026-06-09
 
+- Made malformed Socket.IO frame decode fail closed to an empty message list.
 - Ignored stale heartbeat and polling timeout references in long-polling
   transports after timers are reset.
 - Added a baseline guard that rejects tracked certificate/key material outside
