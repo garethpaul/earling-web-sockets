@@ -160,8 +160,11 @@ handle_cast(heartbeat, #state{
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_info({timeout, _Ref, heartbeat}, State) ->
+handle_info({timeout, Ref, heartbeat}, #state{ heartbeat_interval = {Ref, _Time} } = State) ->
     handle_cast(heartbeat, State);
+
+handle_info({timeout, _Ref, heartbeat}, State) ->
+    {noreply, State};
 
 handle_info(_Info, State) ->
     {noreply, State}.
@@ -201,3 +204,14 @@ reset_interval({TimerRef, Time}) ->
     erlang:cancel_timer(TimerRef),
     NewRef = erlang:start_timer(Time, self(), heartbeat),
     {NewRef, Time}.
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+stale_heartbeat_timer_is_ignored_test() ->
+    CurrentRef = make_ref(),
+    StaleRef = make_ref(),
+    State = #state{ heartbeat_interval = {CurrentRef, 10000} },
+    ?assertEqual({noreply, State}, handle_info({timeout, StaleRef, heartbeat}, State)).
+
+-endif.

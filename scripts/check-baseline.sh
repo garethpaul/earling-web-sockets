@@ -7,8 +7,10 @@ VISION="$ROOT_DIR/VISION.md"
 MAKEFILE="$ROOT_DIR/Makefile"
 PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"
 CHECK_PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-check-wrapper.md"
+HEARTBEAT_PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
+WEBSOCKET="$ROOT_DIR/src/socketio_transport_websocket.erl"
 DEMO="$ROOT_DIR/demo/demo.erl"
 
 for path in \
@@ -18,12 +20,14 @@ for path in \
   "rebar.config" \
   "src/socketio.app.src" \
   "src/socketio_listener.erl" \
+  "src/socketio_transport_websocket.erl" \
   "demo/demo.erl" \
   "test/socketio_data_tests.erl" \
   "test/socketio_listener_tests.erl" \
   ".gitmodules" \
   "CHANGES.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
+  "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
   if [ ! -f "$ROOT_DIR/$path" ]; then
     printf '%s\n' "Required file missing: $path" >&2
@@ -75,6 +79,13 @@ if ! grep -Fq "malformed_origin_rejected_test" "$LISTENER_TESTS" ||
   exit 1
 fi
 
+if ! grep -Fq "stale_heartbeat_timer_is_ignored_test" "$WEBSOCKET" ||
+  ! grep -Fq "handle_info({timeout, Ref, heartbeat}, #state{ heartbeat_interval = {Ref, _Time} } = State)" "$WEBSOCKET" ||
+  ! grep -Fq "handle_info({timeout, _Ref, heartbeat}, State)" "$WEBSOCKET"; then
+  printf '%s\n' "websocket heartbeat handling must ignore stale timer references." >&2
+  exit 1
+fi
+
 demo_port_count=$(grep -Fc "{http_port, 7878}" "$DEMO" || true)
 if [ "$demo_port_count" -ne 1 ]; then
   printf '%s\n' "demo/demo.erl must start the 7878 listener exactly once." >&2
@@ -93,6 +104,11 @@ fi
 
 if ! grep -Fq "status: completed" "$CHECK_PLAN"; then
   printf '%s\n' "Check wrapper plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$HEARTBEAT_PLAN"; then
+  printf '%s\n' "Websocket heartbeat timer plan must be marked completed." >&2
   exit 1
 fi
 
