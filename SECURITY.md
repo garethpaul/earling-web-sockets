@@ -38,8 +38,8 @@ Helpful reports include:
 
 For web services, APIs, sockets, or scraping workflows, prioritize reports involving authentication bypass, authorization errors, injection, server-side request forgery, unsafe deserialization, credential leakage, data exposure, or denial-of-service conditions. Use test accounts and minimal proof-of-concept traffic only.
 
-Polling JSONP callback indexes must stay restricted to non-empty digit strings
-before the JavaScript response wrapper is constructed.
+Polling JSONP callback indexes must stay restricted to bounded non-empty digit
+strings before the JavaScript response wrapper is constructed.
 
 ## Dependency and Supply Chain Security
 

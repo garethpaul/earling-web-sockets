@@ -39,8 +39,8 @@ Current baseline:
   material.
 - Long-polling transports ignore stale heartbeat and polling timer references
   after timers are reset.
-- Polling JSONP callback indexes are restricted to non-empty digit strings
-  before JavaScript response construction.
+- Polling JSONP callback indexes are restricted to bounded non-empty digit
+  strings before JavaScript response construction.
 
 Next priorities:
 

@@ -14,6 +14,7 @@ CREDENTIAL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-demo-credential-boundar
 LONGPOLL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-longpoll-timer-refs.md"
 FRAME_DECODE_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-malformed-frame-decode.md"
 JSONP_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-guard.md"
+JSONP_LENGTH_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-length-guard.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -41,6 +42,7 @@ for path in \
   "CHANGES.md" \
   "docs/plans/2026-06-09-earling-demo-credential-boundary.md" \
   "docs/plans/2026-06-09-earling-jsonp-index-guard.md" \
+  "docs/plans/2026-06-09-earling-jsonp-index-length-guard.md" \
   "docs/plans/2026-06-09-earling-longpoll-timer-refs.md" \
   "docs/plans/2026-06-09-earling-malformed-frame-decode.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
@@ -172,6 +174,21 @@ if ! grep -Fq "safe_jsonp_index(Index)" "$POLLING" ||
   exit 1
 fi
 
+if ! grep -Fq "MAX_JSONP_INDEX_LENGTH" "$POLLING" ||
+  ! grep -Fq "length(Index) =< ?MAX_JSONP_INDEX_LENGTH" "$POLLING" ||
+  ! grep -Fq "jsonp_index_rejects_overlong_values_test" "$POLLING"; then
+  printf '%s\n' "polling JSONP callback indexes must be length-bounded before response construction." >&2
+  exit 1
+fi
+
+if ! grep -Fq "bounded non-empty digit strings" "$README" ||
+  ! grep -Fq "validated and length-bounded" "$README" ||
+  ! grep -Fq "bounded non-empty digit" "$SECURITY" ||
+  ! grep -Fq "bounded non-empty digit" "$VISION"; then
+  printf '%s\n' "Docs must describe the bounded JSONP callback index guard." >&2
+  exit 1
+fi
+
 if ! grep -Fq "try header(Str)" "$DATA" ||
   ! grep -Fq "malformed_frame_returns_empty_list_test" "$DATA" ||
   ! grep -Fq "truncated_frame_returns_empty_list_test" "$DATA" ||
@@ -228,6 +245,16 @@ fi
 
 if ! grep -Fq "make check" "$JSONP_PLAN"; then
   printf '%s\n' "JSONP index guard plan must record make check verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$JSONP_LENGTH_PLAN"; then
+  printf '%s\n' "JSONP index length guard plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "make check" "$JSONP_LENGTH_PLAN"; then
+  printf '%s\n' "JSONP index length guard plan must record make check verification." >&2
   exit 1
 fi
 

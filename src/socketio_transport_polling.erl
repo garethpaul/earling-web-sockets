@@ -9,7 +9,8 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
          terminate/2, code_change/3]).
 
--define(SERVER, ?MODULE). 
+-define(SERVER, ?MODULE).
+-define(MAX_JSONP_INDEX_LENGTH, 16).
 
 -record(state, {
           session_id,
@@ -309,7 +310,8 @@ send_message_1(Headers, Message, Req, Index, ServerModule) ->
     Message1 = "io.JSONP["++Index++"]._(\"" ++ escape(tl(Message0)) ++ ");",
     apply(ServerModule, respond, [Req, 200, Headers0, Message1]).
 
-safe_jsonp_index(Index) when is_list(Index), Index =/= [] ->
+safe_jsonp_index(Index) when is_list(Index), Index =/= [],
+				    length(Index) =< ?MAX_JSONP_INDEX_LENGTH ->
     case jsonp_index_digits(Index) of
 	true ->
 	    Index;
@@ -377,5 +379,8 @@ jsonp_index_rejects_script_characters_test() ->
 
 jsonp_index_rejects_empty_values_test() ->
     ?assertEqual(false, safe_jsonp_index("")).
+
+jsonp_index_rejects_overlong_values_test() ->
+    ?assertEqual(false, safe_jsonp_index("12345678901234567")).
 
 -endif.
