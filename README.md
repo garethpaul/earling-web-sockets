@@ -71,13 +71,14 @@ Run the repository baseline gate:
 
 ```bash
 make check
+make lint
 scripts/check-baseline.sh
 ```
 
-`make check` runs the baseline gate. When Erlang/OTP is installed, the
-baseline gate runs `make test`. In documentation-only environments without
-`erl`/`escript`, it performs static guard checks and reports that the rebar
-tests were skipped.
+`make check` runs the baseline gate, and `make lint` is an alias for the same
+static baseline. When Erlang/OTP is installed, the baseline gate runs
+`make test`. In documentation-only environments without `erl`/`escript`, it
+performs static guard checks and reports that the rebar tests were skipped.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 

@@ -109,8 +109,9 @@ fi
 
 if ! grep -Fq "command -v erl" "$MAKEFILE" ||
   ! grep -Fq "command -v escript" "$MAKEFILE" ||
+  ! grep -Fq "lint: verify" "$MAKEFILE" ||
   ! grep -Fq "check: verify" "$MAKEFILE"; then
-  printf '%s\n' "Makefile must preflight Erlang erl/escript before rebar targets and expose make check." >&2
+  printf '%s\n' "Makefile must preflight Erlang erl/escript before rebar targets and expose make lint/check." >&2
   exit 1
 fi
 

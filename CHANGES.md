@@ -2,6 +2,7 @@
 
 ## 2026-06-09
 
+- Exposed `make lint` as an alias for the static maintenance baseline.
 - Restricted polling JSONP callback indexes to non-empty digit strings before
   constructing JavaScript responses.
 - Made malformed Socket.IO frame decode fail closed to an empty message list.

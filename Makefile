@@ -1,4 +1,4 @@
-.PHONY: all deps compile test verify check check-tools force
+.PHONY: all deps compile lint test verify check check-tools force
 
 all: compile
 
@@ -14,6 +14,8 @@ compile: deps
 
 test: check-tools force
 	@./rebar eunit skip_deps=true
+
+lint: verify
 
 verify:
 	@./scripts/check-baseline.sh
