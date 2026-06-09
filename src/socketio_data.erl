@@ -16,6 +16,7 @@
 -define(JSON_FRAME_LENGTH, 3).
 -define(HEARTBEAT_FRAME, "~h~").
 -define(HEARTBEAT_FRAME_LENGTH, 3).
+-define(MAX_FRAME_LENGTH, 1048576).
 
 
 encode(#msg{ content = Content, json = false }) when is_list(Content) ->
@@ -48,6 +49,8 @@ header(?FRAME ++ Rest=[_|_], Acc)->
 header([N|Rest], Acc) when N >= $0, N =< $9 ->
     header(Rest, [N|Acc]).
 
+body(Length, _Body) when Length < 0; Length > ?MAX_FRAME_LENGTH ->
+    [];
 body(Length, ?JSON_FRAME++Body) ->
     json(Length-?JSON_FRAME_LENGTH, Body);
 body(Length, ?HEARTBEAT_FRAME++Body) ->
@@ -104,5 +107,8 @@ truncated_frame_returns_empty_list_test() ->
 
 invalid_json_frame_returns_empty_list_test() ->
     ?assertEqual([], decode(#msg{content="~m~4~m~~j~{"})).
+
+oversized_frame_returns_empty_list_test() ->
+    ?assertEqual([], decode(#msg{content="~m~1048577~m~a"})).
 
 -endif.

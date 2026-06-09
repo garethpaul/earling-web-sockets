@@ -13,6 +13,7 @@ HEARTBEAT_PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-websocket-heartbeat-time
 CREDENTIAL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-demo-credential-boundary.md"
 LONGPOLL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-longpoll-timer-refs.md"
 FRAME_DECODE_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-malformed-frame-decode.md"
+FRAME_LENGTH_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-frame-length-guard.md"
 JSONP_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-guard.md"
 JSONP_LENGTH_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-length-guard.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
@@ -45,6 +46,7 @@ for path in \
   "docs/plans/2026-06-09-earling-jsonp-index-length-guard.md" \
   "docs/plans/2026-06-09-earling-longpoll-timer-refs.md" \
   "docs/plans/2026-06-09-earling-malformed-frame-decode.md" \
+  "docs/plans/2026-06-09-earling-frame-length-guard.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -197,6 +199,20 @@ if ! grep -Fq "try header(Str)" "$DATA" ||
   exit 1
 fi
 
+if ! grep -Fq "MAX_FRAME_LENGTH" "$DATA" ||
+  ! grep -Fq "Length > ?MAX_FRAME_LENGTH" "$DATA" ||
+  ! grep -Fq "oversized_frame_returns_empty_list_test" "$DATA"; then
+  printf '%s\n' "socketio_data must reject oversized declared frame lengths before body splitting." >&2
+  exit 1
+fi
+
+if ! grep -Fq "Socket.IO frame bodies larger than 1 MiB" "$README" ||
+  ! grep -Fq "frame bodies are capped at 1 MiB" "$SECURITY" ||
+  ! grep -Fq "frame bodies are capped at 1 MiB" "$VISION"; then
+  printf '%s\n' "Docs must describe the Socket.IO frame body length guard." >&2
+  exit 1
+fi
+
 demo_port_count=$(grep -Fc "{http_port, 7878}" "$DEMO" || true)
 if [ "$demo_port_count" -ne 1 ]; then
   printf '%s\n' "demo/demo.erl must start the 7878 listener exactly once." >&2
@@ -235,6 +251,16 @@ fi
 
 if ! grep -Fq "status: completed" "$FRAME_DECODE_PLAN"; then
   printf '%s\n' "Malformed frame decode plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$FRAME_LENGTH_PLAN"; then
+  printf '%s\n' "Frame length guard plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "make check" "$FRAME_LENGTH_PLAN"; then
+  printf '%s\n' "Frame length guard plan must record make check verification." >&2
   exit 1
 fi
 

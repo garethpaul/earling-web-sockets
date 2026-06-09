@@ -41,6 +41,9 @@ For web services, APIs, sockets, or scraping workflows, prioritize reports invol
 Polling JSONP callback indexes must stay restricted to bounded non-empty digit
 strings before the JavaScript response wrapper is constructed.
 
+Socket.IO frame bodies are capped at 1 MiB before payload splitting so
+oversized declared frame lengths fail closed during decode.
+
 ## Dependency and Supply Chain Security
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.

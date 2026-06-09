@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Rejected oversized declared Socket.IO frame body lengths before payload
+  splitting.
 - Exposed `make lint` as an alias for the static maintenance baseline.
 - Bounded polling JSONP callback index lengths before response construction.
 - Restricted polling JSONP callback indexes to non-empty digit strings before

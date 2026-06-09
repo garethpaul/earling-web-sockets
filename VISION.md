@@ -32,6 +32,7 @@ Current baseline:
   origin checks.
 - Malformed Socket.IO frame input fails closed instead of crashing transport
   decode paths.
+- Socket.IO frame bodies are capped at 1 MiB before payload splitting.
 - The non-SSL demo starts each listener port once so local demo behavior stays
   predictable.
 - Demo SSL fixtures are limited to `demo/test_certificate.pem` and

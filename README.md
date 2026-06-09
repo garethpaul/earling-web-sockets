@@ -60,6 +60,8 @@ Socket.IO 0.6 client branch used by the demos.
   apply the configured origin allow-list.
 - Malformed Socket.IO frames decode to an empty message list instead of
   crashing transport handlers.
+- Socket.IO frame bodies larger than 1 MiB are rejected during decode before
+  body splitting.
 - Long-polling heartbeat and polling timeout handlers ignore stale timer
   references after timers are reset.
 - Polling JSONP callback indexes must be bounded non-empty digit strings before
@@ -102,6 +104,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Malformed or relative Origin values are rejected before transport handlers
   apply the configured origin allow-list.
 - Malformed Socket.IO frame input fails closed during decode.
+- Socket.IO frame bodies are capped at 1 MiB before payload splitting.
 - Polling JSONP callback indexes are validated and length-bounded before
   response construction.
 - This code targets old Socket.IO clients. Do not present it as a modern
@@ -123,6 +126,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   polling JSONP callback index length guard.
 - See `docs/plans/2026-06-09-earling-malformed-frame-decode.md` for malformed
   frame decode handling.
+- See `docs/plans/2026-06-09-earling-frame-length-guard.md` for the Socket.IO
+  frame body length guard.
 
 ## Contributing
 
