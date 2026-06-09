@@ -212,10 +212,14 @@ handle_info({'EXIT',Connection,_Reason}, #state{ connection_reference = {Transpo
 
 %% Connections has timed out, but is technically still active. This is like a
 %% heartbeat, but for polling connections.
-handle_info({timeout, _Ref, polling}, #state{ server_module = ServerModule,
+handle_info({timeout, Ref, polling}, #state{ server_module = ServerModule,
+                             polling_duration = {Ref, _Time},
                              connection_reference = {_TransportType, connected},
                              caller = Caller, req = Req, index = Index, sup = Sup } = State) ->
     gen_server:reply(Caller, send_message("", Req, Index, ServerModule, Sup)),
+    {noreply, State};
+
+handle_info({timeout, _Ref, polling}, #state{ connection_reference = {_TransportType, connected} } = State) ->
     {noreply, State};
 
 %% Client has timed out, no active connection found. (connection_reference = none)
@@ -332,3 +336,15 @@ escape([$"]) -> [$"];
 escape([$"|Rest]) -> [$\\, $" | escape(Rest)];
 escape([$\\|Rest]) -> [$\\,$\\ | escape(Rest)];
 escape([CodePoint|Rest]) -> [CodePoint | escape(Rest)].
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+stale_polling_timer_is_ignored_test() ->
+    CurrentRef = make_ref(),
+    StaleRef = make_ref(),
+    State = #state{ connection_reference = {'xhr-polling', connected},
+                    polling_duration = {CurrentRef, 10000} },
+    ?assertEqual({noreply, State}, handle_info({timeout, StaleRef, polling}, State)).
+
+-endif.

@@ -35,6 +35,8 @@ Current baseline:
 - Demo SSL fixtures are limited to `demo/test_certificate.pem` and
   `demo/test_privkey.pem`, and both are documented as test-only local demo
   material.
+- Long-polling transports ignore stale heartbeat and polling timer references
+  after timers are reset.
 
 Next priorities:
 

@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Ignored stale heartbeat and polling timeout references in long-polling
+  transports after timers are reset.
 - Added a baseline guard that rejects tracked certificate/key material outside
   the two test-only SSL demo fixtures.
 - Documented the demo credential boundary in the README, vision, security

@@ -233,8 +233,12 @@ handle_info({timeout, _Ref, heartbeat}, #state{ connection_reference = {'xhr-mul
     handle_info(timeout, State);
 
 %% Good old regular heartbeat. I admire your simplicity.
-handle_info({timeout, _Ref, heartbeat}, State) ->
+handle_info({timeout, Ref, heartbeat}, #state{ connection_reference = {'xhr-multipart', connected},
+                                               heartbeat_interval = {Ref, _Time} } = State) ->
     gen_server:cast(self(), heartbeat),
+    {noreply, State};
+
+handle_info({timeout, _Ref, heartbeat}, #state{ connection_reference = {'xhr-multipart', connected} } = State) ->
     {noreply, State};
 
 handle_info(_Info, State) ->
@@ -286,3 +290,15 @@ reset_heartbeat({TimerRef, Time}) ->
     erlang:cancel_timer(TimerRef),
     NewRef = erlang:start_timer(Time, self(), heartbeat),
     {NewRef, Time}.
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+stale_heartbeat_timer_is_ignored_test() ->
+    CurrentRef = make_ref(),
+    StaleRef = make_ref(),
+    State = #state{ connection_reference = {'xhr-multipart', connected},
+                    heartbeat_interval = {CurrentRef, 10000} },
+    ?assertEqual({noreply, State}, handle_info({timeout, StaleRef, heartbeat}, State)).
+
+-endif.

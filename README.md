@@ -58,6 +58,8 @@ Socket.IO 0.6 client branch used by the demos.
   `demo/test_privkey.pem` are test-only material for local SSL demos.
 - Malformed or relative Origin values are rejected before transport handlers
   apply the configured origin allow-list.
+- Long-polling heartbeat and polling timeout handlers ignore stale timer
+  references after timers are reset.
 
 ## Testing and Verification
 
@@ -105,6 +107,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   the current maintenance baseline.
 - See `docs/plans/2026-06-09-earling-demo-credential-boundary.md` for the
   tracked demo SSL fixture boundary.
+- See `docs/plans/2026-06-09-earling-longpoll-timer-refs.md` for the
+  long-polling timer reference guard.
 
 ## Contributing
 

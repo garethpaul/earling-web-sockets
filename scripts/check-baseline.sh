@@ -11,9 +11,13 @@ PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.m
 CHECK_PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-check-wrapper.md"
 HEARTBEAT_PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md"
 CREDENTIAL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-demo-credential-boundary.md"
+LONGPOLL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-longpoll-timer-refs.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 WEBSOCKET="$ROOT_DIR/src/socketio_transport_websocket.erl"
+XHR_MULTIPART="$ROOT_DIR/src/socketio_transport_xhr_multipart.erl"
+HTMLFILE="$ROOT_DIR/src/socketio_transport_htmlfile.erl"
+POLLING="$ROOT_DIR/src/socketio_transport_polling.erl"
 DEMO="$ROOT_DIR/demo/demo.erl"
 
 for path in \
@@ -32,6 +36,7 @@ for path in \
   ".gitmodules" \
   "CHANGES.md" \
   "docs/plans/2026-06-09-earling-demo-credential-boundary.md" \
+  "docs/plans/2026-06-09-earling-longpoll-timer-refs.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -129,6 +134,29 @@ if ! grep -Fq "stale_heartbeat_timer_is_ignored_test" "$WEBSOCKET" ||
   exit 1
 fi
 
+if ! grep -Fq "stale_heartbeat_timer_is_ignored_test" "$XHR_MULTIPART" ||
+  ! grep -Fq "connection_reference = {'xhr-multipart', connected}" "$XHR_MULTIPART" ||
+  ! grep -Fq "heartbeat_interval = {Ref, _Time}" "$XHR_MULTIPART" ||
+  ! grep -Fq "handle_info({timeout, _Ref, heartbeat}, #state{ connection_reference = {'xhr-multipart', connected} } = State)" "$XHR_MULTIPART"; then
+  printf '%s\n' "xhr-multipart heartbeat handling must ignore stale timer references." >&2
+  exit 1
+fi
+
+if ! grep -Fq "stale_heartbeat_timer_is_ignored_test" "$HTMLFILE" ||
+  ! grep -Fq "connection_reference = {'htmlfile', connected}" "$HTMLFILE" ||
+  ! grep -Fq "heartbeat_interval = {Ref, _Time}" "$HTMLFILE" ||
+  ! grep -Fq "handle_info({timeout, _Ref, heartbeat}, #state{ connection_reference = {'htmlfile', connected} } = State)" "$HTMLFILE"; then
+  printf '%s\n' "htmlfile heartbeat handling must ignore stale timer references." >&2
+  exit 1
+fi
+
+if ! grep -Fq "stale_polling_timer_is_ignored_test" "$POLLING" ||
+  ! grep -Fq "polling_duration = {Ref, _Time}" "$POLLING" ||
+  ! grep -Fq "handle_info({timeout, _Ref, polling}, #state{ connection_reference = {_TransportType, connected} } = State)" "$POLLING"; then
+  printf '%s\n' "polling duration handling must ignore stale timer references." >&2
+  exit 1
+fi
+
 demo_port_count=$(grep -Fc "{http_port, 7878}" "$DEMO" || true)
 if [ "$demo_port_count" -ne 1 ]; then
   printf '%s\n' "demo/demo.erl must start the 7878 listener exactly once." >&2
@@ -157,6 +185,11 @@ fi
 
 if ! grep -Fq "status: completed" "$CREDENTIAL_PLAN"; then
   printf '%s\n' "Demo credential boundary plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$LONGPOLL_PLAN"; then
+  printf '%s\n' "Long-poll timer reference plan must be marked completed." >&2
   exit 1
 fi
 
