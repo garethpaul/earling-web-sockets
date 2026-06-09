@@ -79,6 +79,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 
 - The SSL demo certificate and private key are checked in for local testing
   only.
+- The only tracked certificate/key files are `demo/test_certificate.pem` and
+  `demo/test_privkey.pem`; both are test-only local demo fixtures.
 - Do not commit production certificates, private keys, tokens, or local rebar
   dependency caches.
 - Build outputs such as `ebin`, `.eunit`, `deps`, logs, and the populated
@@ -101,6 +103,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `VISION.md` for project direction and contribution guardrails.
 - See `docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md` for
   the current maintenance baseline.
+- See `docs/plans/2026-06-09-earling-demo-credential-boundary.md` for the
+  tracked demo SSL fixture boundary.
 
 ## Contributing
 

@@ -32,7 +32,9 @@ Current baseline:
   origin checks.
 - The non-SSL demo starts each listener port once so local demo behavior stays
   predictable.
-- Demo SSL certificates are documented as test-only local demo material.
+- Demo SSL fixtures are limited to `demo/test_certificate.pem` and
+  `demo/test_privkey.pem`, and both are documented as test-only local demo
+  material.
 
 Next priorities:
 
@@ -46,7 +48,8 @@ Contribution rules:
 - One PR = one focused transport, build, test, or documentation change.
 - Run `scripts/check-baseline.sh` before pushing Erlang or build changes.
 - Preserve old protocol compatibility unless a migration note explains the break.
-- Keep demo certificates clearly marked as test-only.
+- Keep demo certificates clearly marked as test-only, and do not add tracked
+  certificate/key files beyond the two demo fixtures.
 
 ## Security
 

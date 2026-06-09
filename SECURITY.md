@@ -29,6 +29,10 @@ Helpful reports include:
 - Review found mobile permission or privacy-sensitive data handling; changes in those areas should receive security-focused review before merge.
 - Review found database, model, query, or persistence-related code; changes in those areas should receive security-focused review before merge.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
+- `demo/test_certificate.pem` and `demo/test_privkey.pem` are the only tracked
+  certificate/key files, and both are test-only fixtures for local SSL demos.
+  Do not commit production certificates, private keys, tokens, generated
+  secrets, local rebar dependency caches, or machine-local configuration.
 
 ## Service and API Notes
 

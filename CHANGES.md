@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-09
+
+- Added a baseline guard that rejects tracked certificate/key material outside
+  the two test-only SSL demo fixtures.
+- Documented the demo credential boundary in the README, vision, security
+  policy, and maintenance plan.
+
 ## 2026-06-08
 
 - Added a root `make check` wrapper for the maintenance baseline.

@@ -3,11 +3,14 @@ set -eu
 
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 README="$ROOT_DIR/README.md"
+SECURITY="$ROOT_DIR/SECURITY.md"
 VISION="$ROOT_DIR/VISION.md"
 MAKEFILE="$ROOT_DIR/Makefile"
+GITIGNORE="$ROOT_DIR/.gitignore"
 PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"
 CHECK_PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-check-wrapper.md"
 HEARTBEAT_PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md"
+CREDENTIAL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-demo-credential-boundary.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 WEBSOCKET="$ROOT_DIR/src/socketio_transport_websocket.erl"
@@ -15,9 +18,11 @@ DEMO="$ROOT_DIR/demo/demo.erl"
 
 for path in \
   "README.md" \
+  "SECURITY.md" \
   "VISION.md" \
   "Makefile" \
   "rebar.config" \
+  ".gitignore" \
   "src/socketio.app.src" \
   "src/socketio_listener.erl" \
   "src/socketio_transport_websocket.erl" \
@@ -26,6 +31,7 @@ for path in \
   "test/socketio_listener_tests.erl" \
   ".gitmodules" \
   "CHANGES.md" \
+  "docs/plans/2026-06-09-earling-demo-credential-boundary.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -49,6 +55,43 @@ fi
 if grep -Fq "static web project" "$README" ||
   grep -Fq "no obvious test files detected" "$README"; then
   printf '%s\n' "README must not contain stale scanner-generated project classification." >&2
+  exit 1
+fi
+
+for ignore_entry in \
+  "/.eunit/" \
+  "/deps/" \
+  "/ebin/" \
+  "/logs/" \
+  "/priv/Socket.IO/" \
+  ".agner.config" \
+  "erl_crash.dump"; do
+  if ! grep -Fxq "$ignore_entry" "$GITIGNORE"; then
+    printf '%s\n' ".gitignore must keep generated Erlang/rebar artifacts untracked: $ignore_entry" >&2
+    exit 1
+  fi
+done
+
+tracked_key_material=$(git -C "$ROOT_DIR" ls-files | grep -Ei '\.(pem|key)$' || true)
+expected_key_material='demo/test_certificate.pem
+demo/test_privkey.pem'
+
+if [ "$tracked_key_material" != "$expected_key_material" ]; then
+  printf '%s\n' "Only demo/test_certificate.pem and demo/test_privkey.pem may be tracked certificate/key material." >&2
+  printf '%s\n%s\n' "Tracked certificate/key material:" "$tracked_key_material" >&2
+  exit 1
+fi
+
+if ! grep -Fq "demo/test_certificate.pem" "$SECURITY" ||
+  ! grep -Fq "demo/test_privkey.pem" "$SECURITY" ||
+  ! grep -Fq "test-only" "$SECURITY"; then
+  printf '%s\n' "SECURITY must document the demo-only certificate/key boundary." >&2
+  exit 1
+fi
+
+if ! grep -Fq "demo/test_privkey.pem" "$README" ||
+  ! grep -Fq "Do not commit production certificates" "$README"; then
+  printf '%s\n' "README must document demo-only SSL material and production credential exclusions." >&2
   exit 1
 fi
 
@@ -112,8 +155,19 @@ if ! grep -Fq "status: completed" "$HEARTBEAT_PLAN"; then
   exit 1
 fi
 
+if ! grep -Fq "status: completed" "$CREDENTIAL_PLAN"; then
+  printf '%s\n' "Demo credential boundary plan must be marked completed." >&2
+  exit 1
+fi
+
 if ! grep -Fq "Run \`scripts/check-baseline.sh\`" "$VISION"; then
   printf '%s\n' "VISION must include the static baseline command in contribution guidance." >&2
+  exit 1
+fi
+
+if ! grep -Fq "demo/test_certificate.pem" "$VISION" ||
+  ! grep -Fq "demo/test_privkey.pem" "$VISION"; then
+  printf '%s\n' "VISION must name the only tracked demo certificate/key fixtures." >&2
   exit 1
 fi
 
