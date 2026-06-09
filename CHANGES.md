@@ -2,6 +2,7 @@
 
 ## 2026-06-08
 
+- Added a root `make check` wrapper for the maintenance baseline.
 - Added explicit Erlang/OTP tool checks before legacy `rebar` tasks run.
 - Added a baseline script that runs rebar tests when `erl`/`escript` are
   available and static maintenance checks otherwise.

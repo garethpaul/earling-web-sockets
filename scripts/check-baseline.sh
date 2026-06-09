@@ -6,6 +6,7 @@ README="$ROOT_DIR/README.md"
 VISION="$ROOT_DIR/VISION.md"
 MAKEFILE="$ROOT_DIR/Makefile"
 PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"
+CHECK_PLAN="$ROOT_DIR/docs/plans/2026-06-08-earling-check-wrapper.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DEMO="$ROOT_DIR/demo/demo.erl"
@@ -22,6 +23,7 @@ for path in \
   "test/socketio_listener_tests.erl" \
   ".gitmodules" \
   "CHANGES.md" \
+  "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
   if [ ! -f "$ROOT_DIR/$path" ]; then
     printf '%s\n' "Required file missing: $path" >&2
@@ -31,6 +33,7 @@ done
 
 if ! grep -Fq "Erlang/OTP" "$README" ||
   ! grep -Fq "escript" "$README" ||
+  ! grep -Fq "make check" "$README" ||
   ! grep -Fq "make test" "$README" ||
   ! grep -Fq "Socket.IO 0.6" "$README" ||
   ! grep -Fq "test-only" "$README" ||
@@ -46,8 +49,9 @@ if grep -Fq "static web project" "$README" ||
 fi
 
 if ! grep -Fq "command -v erl" "$MAKEFILE" ||
-  ! grep -Fq "command -v escript" "$MAKEFILE"; then
-  printf '%s\n' "Makefile must preflight Erlang erl/escript before rebar targets." >&2
+  ! grep -Fq "command -v escript" "$MAKEFILE" ||
+  ! grep -Fq "check: verify" "$MAKEFILE"; then
+  printf '%s\n' "Makefile must preflight Erlang erl/escript before rebar targets and expose make check." >&2
   exit 1
 fi
 
@@ -84,6 +88,11 @@ fi
 
 if ! grep -Fq "status: completed" "$PLAN"; then
   printf '%s\n' "Plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$CHECK_PLAN"; then
+  printf '%s\n' "Check wrapper plan must be marked completed." >&2
   exit 1
 fi
 
