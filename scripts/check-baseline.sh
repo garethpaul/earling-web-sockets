@@ -14,6 +14,7 @@ CREDENTIAL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-demo-credential-boundar
 LONGPOLL_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-longpoll-timer-refs.md"
 FRAME_DECODE_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-malformed-frame-decode.md"
 FRAME_LENGTH_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-frame-length-guard.md"
+FRAME_LENGTH_PREFIX_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-frame-length-prefix-guard.md"
 JSONP_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-guard.md"
 JSONP_LENGTH_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-length-guard.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
@@ -47,6 +48,7 @@ for path in \
   "docs/plans/2026-06-09-earling-longpoll-timer-refs.md" \
   "docs/plans/2026-06-09-earling-malformed-frame-decode.md" \
   "docs/plans/2026-06-09-earling-frame-length-guard.md" \
+  "docs/plans/2026-06-09-earling-frame-length-prefix-guard.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -206,10 +208,25 @@ if ! grep -Fq "MAX_FRAME_LENGTH" "$DATA" ||
   exit 1
 fi
 
+if ! grep -Fq "MAX_FRAME_LENGTH_DIGITS" "$DATA" ||
+  ! grep -Fq "length(Acc) < ?MAX_FRAME_LENGTH_DIGITS" "$DATA" ||
+  ! grep -Fq "safe_frame_length(Acc)" "$DATA" ||
+  ! grep -Fq "overlong_frame_length_prefix_returns_empty_list_test" "$DATA"; then
+  printf '%s\n' "socketio_data must bound frame length prefixes before integer parsing." >&2
+  exit 1
+fi
+
 if ! grep -Fq "Socket.IO frame bodies larger than 1 MiB" "$README" ||
   ! grep -Fq "frame bodies are capped at 1 MiB" "$SECURITY" ||
   ! grep -Fq "frame bodies are capped at 1 MiB" "$VISION"; then
   printf '%s\n' "Docs must describe the Socket.IO frame body length guard." >&2
+  exit 1
+fi
+
+if ! grep -Fq "Frame length prefixes are digit-bounded" "$README" ||
+  ! grep -Fq "frame length prefixes are digit-bounded" "$SECURITY" ||
+  ! grep -Fq "Frame length prefixes are digit-bounded" "$VISION"; then
+  printf '%s\n' "Docs must describe the Socket.IO frame length prefix guard." >&2
   exit 1
 fi
 
@@ -261,6 +278,16 @@ fi
 
 if ! grep -Fq "make check" "$FRAME_LENGTH_PLAN"; then
   printf '%s\n' "Frame length guard plan must record make check verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "Status: Completed" "$FRAME_LENGTH_PREFIX_PLAN"; then
+  printf '%s\n' "Frame length prefix guard plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "make check" "$FRAME_LENGTH_PREFIX_PLAN"; then
+  printf '%s\n' "Frame length prefix guard plan must record make check verification." >&2
   exit 1
 fi
 

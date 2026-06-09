@@ -62,6 +62,8 @@ Socket.IO 0.6 client branch used by the demos.
   crashing transport handlers.
 - Socket.IO frame bodies larger than 1 MiB are rejected during decode before
   body splitting.
+- Frame length prefixes are digit-bounded before integer parsing so hostile
+  length fields fail closed during decode.
 - Long-polling heartbeat and polling timeout handlers ignore stale timer
   references after timers are reset.
 - Polling JSONP callback indexes must be bounded non-empty digit strings before
@@ -105,6 +107,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
   apply the configured origin allow-list.
 - Malformed Socket.IO frame input fails closed during decode.
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.
+- Frame length prefixes are digit-bounded before integer parsing.
 - Polling JSONP callback indexes are validated and length-bounded before
   response construction.
 - This code targets old Socket.IO clients. Do not present it as a modern
@@ -128,6 +131,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   frame decode handling.
 - See `docs/plans/2026-06-09-earling-frame-length-guard.md` for the Socket.IO
   frame body length guard.
+- See `docs/plans/2026-06-09-earling-frame-length-prefix-guard.md` for the
+  Socket.IO frame length prefix guard.
 
 ## Contributing
 

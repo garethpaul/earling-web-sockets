@@ -17,6 +17,7 @@
 -define(HEARTBEAT_FRAME, "~h~").
 -define(HEARTBEAT_FRAME_LENGTH, 3).
 -define(MAX_FRAME_LENGTH, 1048576).
+-define(MAX_FRAME_LENGTH_DIGITS, 7).
 
 
 encode(#msg{ content = Content, json = false }) when is_list(Content) ->
@@ -44,10 +45,28 @@ header(?FRAME ++ Rest) ->
     header(Rest, []).
 
 header(?FRAME ++ Rest=[_|_], Acc)->
+    case safe_frame_length(Acc) of
+	false ->
+	    [];
+	Length ->
+	    body(Length, Rest)
+    end;
+header([N|Rest], Acc) when N >= $0, N =< $9,
+			    length(Acc) < ?MAX_FRAME_LENGTH_DIGITS ->
+    header(Rest, [N|Acc]);
+header([N|_Rest], _Acc) when N >= $0, N =< $9 ->
+    [].
+
+safe_frame_length([]) ->
+    false;
+safe_frame_length(Acc) ->
     Length = list_to_integer(lists:reverse(Acc)),
-    body(Length, Rest);
-header([N|Rest], Acc) when N >= $0, N =< $9 ->
-    header(Rest, [N|Acc]).
+    case Length =< ?MAX_FRAME_LENGTH of
+	true ->
+	    Length;
+	false ->
+	    false
+    end.
 
 body(Length, _Body) when Length < 0; Length > ?MAX_FRAME_LENGTH ->
     [];
@@ -110,5 +129,9 @@ invalid_json_frame_returns_empty_list_test() ->
 
 oversized_frame_returns_empty_list_test() ->
     ?assertEqual([], decode(#msg{content="~m~1048577~m~a"})).
+
+overlong_frame_length_prefix_returns_empty_list_test() ->
+    Prefix = lists:duplicate(64, $9),
+    ?assertEqual([], decode(#msg{content="~m~" ++ Prefix ++ "~m~a"})).
 
 -endif.

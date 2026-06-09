@@ -43,6 +43,7 @@ strings before the JavaScript response wrapper is constructed.
 
 Socket.IO frame bodies are capped at 1 MiB before payload splitting so
 oversized declared frame lengths fail closed during decode.
+Socket.IO frame length prefixes are digit-bounded before integer parsing.
 
 ## Dependency and Supply Chain Security
 

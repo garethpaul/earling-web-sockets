@@ -2,6 +2,7 @@
 
 ## 2026-06-09
 
+- Bounded Socket.IO frame length prefixes before integer parsing during decode.
 - Rejected oversized declared Socket.IO frame body lengths before payload
   splitting.
 - Exposed `make lint` as an alias for the static maintenance baseline.
