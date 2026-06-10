@@ -19,6 +19,7 @@ JSONP_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-guard.md"
 JSONP_LENGTH_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-length-guard.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
 CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
+ORIGIN_PLAN="$ROOT_DIR/docs/plans/2026-06-10-web-origin-boundary.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -53,6 +54,7 @@ for path in \
   "docs/plans/2026-06-09-earling-frame-length-guard.md" \
   "docs/plans/2026-06-09-earling-frame-length-prefix-guard.md" \
   "docs/plans/2026-06-10-ci-baseline.md" \
+  "docs/plans/2026-06-10-web-origin-boundary.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -70,7 +72,7 @@ if ! grep -Fq "Erlang/OTP" "$README" ||
   ! grep -Fq "test-only" "$README" ||
   ! grep -Fq "Malformed Socket.IO frames" "$README" ||
   ! grep -Fq "GitHub Actions" "$README" ||
-  ! grep -Fq "Malformed or relative Origin values" "$README"; then
+  ! grep -Fq 'Origin values must be complete `http` or `https` origins' "$README"; then
   printf '%s\n' "README must document Erlang, escript, tests, legacy Socket.IO scope, demo certificate status, frame decode, GitHub Actions, and Origin handling." >&2
   exit 1
 fi
@@ -154,6 +156,33 @@ fi
 if ! grep -Fq "malformed_origin_rejected_test" "$LISTENER_TESTS" ||
   ! grep -Fq "relative_origin_rejected_test" "$LISTENER_TESTS"; then
   printf '%s\n' "socketio_listener_tests must cover malformed and relative Origin rejection." >&2
+  exit 1
+fi
+
+for origin_contract in \
+  "userinfo = undefined" \
+  "path = []" \
+  "fragment = undefined" \
+  '}, ""}' \
+  "origin_port(Scheme, Port)" \
+  '{"http", undefined} -> 80' \
+  '{"https", undefined} -> 443' \
+  "Value =< 65535" \
+  "https_port_default_origins_test" \
+  "non_web_scheme_rejected_test" \
+  "userinfo_origin_rejected_test" \
+  "path_origin_rejected_test" \
+  "trailing_origin_data_rejected_test" \
+  "invalid_origin_port_rejected_test"; do
+  if ! grep -Fq "$origin_contract" "$LISTENER" "$LISTENER_TESTS"; then
+    printf '%s\n' "Canonical web-origin contract is missing: $origin_contract" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq "Status: Completed" "$ORIGIN_PLAN" ||
+  ! grep -Fq "make check" "$ORIGIN_PLAN"; then
+  printf '%s\n' "Web-origin boundary plan must remain completed with verification recorded." >&2
   exit 1
 fi
 

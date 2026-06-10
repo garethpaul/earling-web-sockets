@@ -2,6 +2,11 @@
 
 ## 2026-06-10
 
+- Restricted origin allow-list evaluation to fully consumed HTTP/HTTPS origins
+  without userinfo, paths, queries, fragments, or invalid explicit ports.
+- Normalized omitted origin ports to 80 for HTTP and 443 for HTTPS.
+- Added EUnit and static baseline coverage for malformed origin variants and
+  secure default-port handling.
 - Added a GitHub Actions check workflow that runs the existing maintenance
   `make check` baseline on pushes, pull requests, and manual dispatches.
 - Pinned checkout by commit, restricted workflow permissions to read-only,

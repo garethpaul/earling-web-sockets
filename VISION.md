@@ -30,6 +30,9 @@ Current baseline:
   available and static maintenance checks otherwise.
 - Malformed or relative Origin values fail closed instead of crashing listener
   origin checks.
+- Origin parsing requires complete HTTP/HTTPS origins without userinfo or extra
+  URI components and normalizes omitted ports by scheme before allow-list
+  matching.
 - Malformed Socket.IO frame input fails closed instead of crashing transport
   decode paths.
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.

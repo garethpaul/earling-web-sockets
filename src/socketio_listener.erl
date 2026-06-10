@@ -65,11 +65,35 @@ origins(Server, Origins) ->
 
 verify_origin(Origin, Origins) ->
     case catch ex_uri:decode(Origin) of
-        {ok, #ex_uri{ authority = #ex_uri_authority{ host = Host, port = Port } }, _}
+        {ok, #ex_uri{
+                scheme = Scheme,
+                authority = #ex_uri_authority{
+                    userinfo = undefined,
+                    host = Host,
+                    port = Port
+                },
+                path = [],
+                q = undefined,
+                fragment = undefined
+            }, ""}
           when Host =/= undefined, Host =/= "" ->
-            verify_origin_1({Host, Port}, Origins);
+            case origin_port(Scheme, Port) of
+                false ->
+                    false;
+                OriginPort ->
+                    verify_origin_1({Host, OriginPort}, Origins)
+            end;
         _ ->
             false
+    end.
+
+origin_port(Scheme, Port) ->
+    case {string:to_lower(Scheme), Port} of
+        {"http", undefined} -> 80;
+        {"https", undefined} -> 443;
+        {"http", Value} when is_integer(Value), Value > 0, Value =< 65535 -> Value;
+        {"https", Value} when is_integer(Value), Value > 0, Value =< 65535 -> Value;
+        _ -> false
     end.
 
 %%%===================================================================

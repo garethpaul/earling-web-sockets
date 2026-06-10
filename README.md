@@ -56,8 +56,10 @@ Socket.IO 0.6 client branch used by the demos.
   branch for protocol compatibility.
 - Demo certificates under `demo/test_certificate.pem` and
   `demo/test_privkey.pem` are test-only material for local SSL demos.
-- Malformed or relative Origin values are rejected before transport handlers
-  apply the configured origin allow-list.
+- Origin values must be complete `http` or `https` origins without userinfo,
+  paths, queries, fragments, trailing parser data, or invalid ports before
+  transport handlers apply the configured allow-list. Omitted ports normalize
+  to 80 for HTTP and 443 for HTTPS.
 - Malformed Socket.IO frames decode to an empty message list instead of
   crashing transport handlers.
 - Socket.IO frame bodies larger than 1 MiB are rejected during decode before
@@ -110,8 +112,9 @@ When the required SDK or runtime is unavailable, use static checks and source re
   handling, SSL options, demo certificates, and dependency fetching.
 - The default listener origin configuration in the legacy supervisor allows
   broad origins unless callers provide a narrower `origins` option.
-- Malformed or relative Origin values are rejected before transport handlers
-  apply the configured origin allow-list.
+- Origin checks accept only complete HTTP/HTTPS origins, reject userinfo and
+  extra URI components, validate explicit ports, and apply scheme-correct
+  defaults before the configured allow-list.
 - Malformed Socket.IO frame input fails closed during decode.
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.
 - Frame length prefixes are digit-bounded before integer parsing.
@@ -141,6 +144,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `docs/plans/2026-06-09-earling-frame-length-prefix-guard.md` for the
   Socket.IO frame length prefix guard.
 - See `docs/plans/2026-06-10-ci-baseline.md` for the GitHub Actions baseline.
+- See `docs/plans/2026-06-10-web-origin-boundary.md` for canonical web-origin
+  parsing and default-port handling.
 
 ## Contributing
 

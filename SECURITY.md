@@ -43,6 +43,10 @@ For web services, APIs, sockets, or scraping workflows, prioritize reports invol
 Polling JSONP callback indexes must stay restricted to bounded non-empty digit
 strings before the JavaScript response wrapper is constructed.
 
+Origin allow-list checks require a complete HTTP/HTTPS origin without userinfo,
+paths, queries, fragments, parser leftovers, or invalid explicit ports. Omitted
+ports normalize to 80 for HTTP and 443 for HTTPS before matching.
+
 Socket.IO frame bodies are capped at 1 MiB before payload splitting so
 oversized declared frame lengths fail closed during decode.
 Socket.IO frame length prefixes are digit-bounded before integer parsing.
