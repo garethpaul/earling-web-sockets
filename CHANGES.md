@@ -1,5 +1,18 @@
 # Changes
 
+## 2026-06-10
+
+- Added a GitHub Actions check workflow that runs the existing maintenance
+  `make check` baseline on pushes, pull requests, and manual dispatches.
+- Pinned checkout by commit, restricted workflow permissions to read-only,
+  enabled stale-run cancellation, and bounded the static job to five minutes.
+- Documented that hosted verification is static until a compatible Erlang/OTP
+  release is established for the bundled legacy rebar toolchain.
+- Added explicit `EARLING_STATIC_ONLY=1` handling so runner image changes cannot
+  silently enable tests against an unqualified Erlang release.
+- Added a static guard requiring the CI workflow and completed CI baseline plan
+  to remain checked in.
+
 ## 2026-06-09
 
 - Bounded Socket.IO frame length prefixes before integer parsing during decode.

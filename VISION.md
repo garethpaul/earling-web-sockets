@@ -43,6 +43,8 @@ Current baseline:
   after timers are reset.
 - Polling JSONP callback indexes are restricted to bounded non-empty digit
   strings before JavaScript response construction.
+- GitHub Actions runs the static maintenance `make check` baseline with pinned,
+  read-only workflow dependencies before review.
 
 Next priorities:
 
@@ -56,6 +58,8 @@ Contribution rules:
 - One PR = one focused transport, build, test, or documentation change.
 - Run `scripts/check-baseline.sh` before pushing Erlang or build changes.
 - Preserve old protocol compatibility unless a migration note explains the break.
+- Keep `.github/workflows/check.yml` aligned with the static maintenance
+  baseline until a compatible Erlang/OTP release is documented and tested.
 - Keep demo certificates clearly marked as test-only, and do not add tracked
   certificate/key files beyond the two demo fixtures.
 

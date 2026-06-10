@@ -17,6 +17,8 @@ FRAME_LENGTH_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-frame-length-guard.md
 FRAME_LENGTH_PREFIX_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-frame-length-prefix-guard.md"
 JSONP_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-guard.md"
 JSONP_LENGTH_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-length-guard.md"
+CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
+CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -42,6 +44,7 @@ for path in \
   "test/socketio_listener_tests.erl" \
   ".gitmodules" \
   "CHANGES.md" \
+  ".github/workflows/check.yml" \
   "docs/plans/2026-06-09-earling-demo-credential-boundary.md" \
   "docs/plans/2026-06-09-earling-jsonp-index-guard.md" \
   "docs/plans/2026-06-09-earling-jsonp-index-length-guard.md" \
@@ -49,6 +52,7 @@ for path in \
   "docs/plans/2026-06-09-earling-malformed-frame-decode.md" \
   "docs/plans/2026-06-09-earling-frame-length-guard.md" \
   "docs/plans/2026-06-09-earling-frame-length-prefix-guard.md" \
+  "docs/plans/2026-06-10-ci-baseline.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -65,8 +69,9 @@ if ! grep -Fq "Erlang/OTP" "$README" ||
   ! grep -Fq "Socket.IO 0.6" "$README" ||
   ! grep -Fq "test-only" "$README" ||
   ! grep -Fq "Malformed Socket.IO frames" "$README" ||
+  ! grep -Fq "GitHub Actions" "$README" ||
   ! grep -Fq "Malformed or relative Origin values" "$README"; then
-  printf '%s\n' "README must document Erlang, escript, tests, legacy Socket.IO scope, demo certificate status, frame decode, and Origin handling." >&2
+  printf '%s\n' "README must document Erlang, escript, tests, legacy Socket.IO scope, demo certificate status, frame decode, GitHub Actions, and Origin handling." >&2
   exit 1
 fi
 
@@ -118,6 +123,17 @@ if ! grep -Fq "command -v erl" "$MAKEFILE" ||
   ! grep -Fq "lint: verify" "$MAKEFILE" ||
   ! grep -Fq "check: verify" "$MAKEFILE"; then
   printf '%s\n' "Makefile must preflight Erlang erl/escript before rebar targets and expose make lint/check." >&2
+  exit 1
+fi
+
+if ! grep -Fq "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" "$CI_WORKFLOW" ||
+  ! grep -Fq "run: EARLING_STATIC_ONLY=1 make check" "$CI_WORKFLOW" ||
+  ! grep -Fq "permissions:" "$CI_WORKFLOW" ||
+  ! grep -Fq "contents: read" "$CI_WORKFLOW" ||
+  ! grep -Fq "workflow_dispatch:" "$CI_WORKFLOW" ||
+  ! grep -Fq "cancel-in-progress: true" "$CI_WORKFLOW" ||
+  ! grep -Fq "timeout-minutes: 5" "$CI_WORKFLOW"; then
+  printf '%s\n' "GitHub Actions workflow must pin checkout and run the bounded, read-only make check baseline." >&2
   exit 1
 fi
 
@@ -311,6 +327,16 @@ if ! grep -Fq "make check" "$JSONP_LENGTH_PLAN"; then
   exit 1
 fi
 
+if ! grep -Fq "Status: Completed" "$CI_PLAN"; then
+  printf '%s\n' "Earling CI baseline plan must be marked completed." >&2
+  exit 1
+fi
+
+if ! grep -Fq "make check" "$CI_PLAN"; then
+  printf '%s\n' "Earling CI baseline plan must record make check verification." >&2
+  exit 1
+fi
+
 if ! grep -Fq "make check" "$FRAME_DECODE_PLAN"; then
   printf '%s\n' "Malformed frame decode plan must record make check verification." >&2
   exit 1
@@ -327,7 +353,9 @@ if ! grep -Fq "demo/test_certificate.pem" "$VISION" ||
   exit 1
 fi
 
-if command -v erl >/dev/null 2>&1 && command -v escript >/dev/null 2>&1; then
+if [ "${EARLING_STATIC_ONLY:-0}" = "1" ]; then
+  printf '%s\n' "Skipping make test: static-only verification requested."
+elif command -v erl >/dev/null 2>&1 && command -v escript >/dev/null 2>&1; then
   make -C "$ROOT_DIR" test
 else
   printf '%s\n' "Skipping make test: Erlang erl/escript is not installed."
