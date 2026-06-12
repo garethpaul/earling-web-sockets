@@ -88,8 +88,9 @@ static baseline. When Erlang/OTP is installed, the baseline gate runs
 performs static guard checks and reports that the rebar tests were skipped.
 GitHub Actions runs the static portion of `make check` through
 `.github/workflows/check.yml` on pushes, pull requests, and manual dispatches.
-The workflow pins checkout by commit, grants read-only repository access, and
-uses `EARLING_STATIC_ONLY=1` with a five-minute timeout so runner image changes
+The workflow pins checkout by commit on Ubuntu 24.04, disables checkout
+credential persistence, grants read-only repository access, and uses
+`EARLING_STATIC_ONLY=1` with a five-minute timeout so runner image changes
 cannot silently select an unqualified Erlang release. It does not claim Erlang
 runtime compatibility; full rebar tests still require a locally installed,
 compatible Erlang/OTP.

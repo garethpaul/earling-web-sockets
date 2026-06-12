@@ -396,6 +396,44 @@ if ! grep -Fq "make check" "$CI_PLAN"; then
   exit 1
 fi
 
+for workflow_contract in \
+  "runs-on: ubuntu-24.04" \
+  "permissions:" \
+  "contents: read" \
+  "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" \
+  "persist-credentials: false" \
+  "timeout-minutes: 5" \
+  "EARLING_STATIC_ONLY=1 make check"; do
+  if ! grep -Fq "$workflow_contract" "$CI_WORKFLOW"; then
+    printf '%s\n' "Earling CI workflow must keep contract: $workflow_contract" >&2
+    exit 1
+  fi
+done
+
+workflow_paths=$(find "$ROOT_DIR/.github/workflows" -type f \( -name '*.yml' -o -name '*.yaml' \) -print | LC_ALL=C sort)
+if [ "$workflow_paths" != "$CI_WORKFLOW" ]; then
+  printf '%s\n' "The canonical Earling check must be the only GitHub Actions workflow." >&2
+  exit 1
+fi
+
+if [ "$(grep -Fc "actions/checkout@" "$CI_WORKFLOW")" -ne 1 ] ||
+  [ "$(grep -Fc "persist-credentials:" "$CI_WORKFLOW")" -ne 1 ] ||
+  grep -Fq "persist-credentials: true" "$CI_WORKFLOW"; then
+  printf '%s\n' "Earling CI must use one pinned checkout with credential persistence disabled." >&2
+  exit 1
+fi
+
+if [ "$(grep -Ec '^[[:space:]]*permissions:' "$CI_WORKFLOW")" -ne 1 ] ||
+  grep -Eq 'write-all|contents:[[:space:]]*write|pull-requests:[[:space:]]*write|actions:[[:space:]]*write' "$CI_WORKFLOW"; then
+  printf '%s\n' "Earling CI permissions must remain globally read-only." >&2
+  exit 1
+fi
+
+if grep -Fq "ubuntu-latest" "$CI_WORKFLOW"; then
+  printf '%s\n' "Earling CI must not use a floating Ubuntu runner." >&2
+  exit 1
+fi
+
 if ! grep -Fq "make check" "$FRAME_DECODE_PLAN"; then
   printf '%s\n' "Malformed frame decode plan must record make check verification." >&2
   exit 1

@@ -33,8 +33,9 @@ Helpful reports include:
   certificate/key files, and both are test-only fixtures for local SSL demos.
   Do not commit production certificates, private keys, tokens, generated
   secrets, local rebar dependency caches, or machine-local configuration.
-- GitHub Actions runs the static maintenance `make check` baseline with pinned
-  checkout, read-only repository access, and a five-minute timeout.
+- GitHub Actions runs the static maintenance `make check` baseline on Ubuntu
+  24.04 with pinned checkout, disabled credential persistence, read-only
+  repository access, and a five-minute timeout.
 
 ## Service and API Notes
 

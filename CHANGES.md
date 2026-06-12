@@ -14,6 +14,8 @@
 - Normalized omitted origin ports to 80 for HTTP and 443 for HTTPS.
 - Added EUnit and static baseline coverage for malformed origin variants and
   secure default-port handling.
+- Pinned hosted static verification to Ubuntu 24.04, disabled checkout
+  credential persistence, and added fail-closed workflow trust-boundary checks.
 - Added a GitHub Actions check workflow that runs the existing maintenance
   `make check` baseline on pushes, pull requests, and manual dispatches.
 - Pinned checkout by commit, restricted workflow permissions to read-only,

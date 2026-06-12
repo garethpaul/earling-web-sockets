@@ -21,7 +21,8 @@ legacy rebar tests when Erlang/OTP is available.
 - Added `.github/workflows/check.yml` to run `make check` on pushes, pull
   requests, and manual dispatches.
 - Pinned checkout by commit, granted read-only repository access, enabled
-  stale-run cancellation, and limited the job to five minutes.
+  stale-run cancellation, pinned the runner to Ubuntu 24.04, disabled checkout
+  credential persistence, and limited the job to five minutes.
 - Set `EARLING_STATIC_ONLY=1` in the hosted job so runner image changes cannot
   silently select an unqualified Erlang runtime.
 - Reused the existing checker behavior that runs static guards and conditionally
@@ -32,10 +33,12 @@ legacy rebar tests when Erlang/OTP is available.
 
 ## Verification
 
-- `EARLING_STATIC_ONLY=1 make check`
-- `make check`
-- `scripts/check-baseline.sh`
-- `git diff --check`
+- `EARLING_STATIC_ONLY=1 make check` passes the complete static maintenance
+  baseline.
+- Five origin-normalization mutations and five CI trust-boundary mutations are
+  rejected, including a floating runner, restored checkout credentials,
+  duplicate checkout, workflow write permission, and a hidden extra workflow.
+- `sh -n scripts/check-baseline.sh` and `git diff --check` pass.
 
 ## Follow-Up Candidates
 
