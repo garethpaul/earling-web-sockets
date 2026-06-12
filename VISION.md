@@ -33,6 +33,8 @@ Current baseline:
 - Origin parsing requires complete HTTP/HTTPS origins without userinfo or extra
   URI components and normalizes omitted ports by scheme before allow-list
   matching.
+- Origin allow-list hostnames compare case-insensitively while preserving exact
+  hostname boundaries and explicit wildcard behavior.
 - Malformed Socket.IO frame input fails closed instead of crashing transport
   decode paths.
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.
@@ -53,6 +55,8 @@ Next priorities:
 
 - Add clear maintenance-status and supported-client notes
 - Verify the rebar build and tests on a documented Erlang version
+- Define and reject ambiguous duplicate or comma-joined Origin headers
+- Bound synchronous transport calls made by the central HTTP router
 - Document SSL demo certificate usage
 - Tighten contribution and known-issues sections that the README lists as TODOs
 

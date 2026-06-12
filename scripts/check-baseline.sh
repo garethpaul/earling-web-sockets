@@ -20,6 +20,7 @@ JSONP_LENGTH_PLAN="$ROOT_DIR/docs/plans/2026-06-09-earling-jsonp-index-length-gu
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
 CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
 ORIGIN_PLAN="$ROOT_DIR/docs/plans/2026-06-10-web-origin-boundary.md"
+ORIGIN_CASE_PLAN="$ROOT_DIR/docs/plans/2026-06-12-origin-host-case-normalization.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -55,6 +56,7 @@ for path in \
   "docs/plans/2026-06-09-earling-frame-length-prefix-guard.md" \
   "docs/plans/2026-06-10-ci-baseline.md" \
   "docs/plans/2026-06-10-web-origin-boundary.md" \
+  "docs/plans/2026-06-12-origin-host-case-normalization.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -183,6 +185,34 @@ done
 if ! grep -Fq "Status: Completed" "$ORIGIN_PLAN" ||
   ! grep -Fq "make check" "$ORIGIN_PLAN"; then
   printf '%s\n' "Web-origin boundary plan must remain completed with verification recorded." >&2
+  exit 1
+fi
+
+for origin_case_contract in \
+  "origin_host_matches(Host, AllowedHost)" \
+  "string:to_lower(Host) =:= string:to_lower(AllowedHost)" \
+  "origin_port_matches(Port, AllowedPort)" \
+  "verify_origin_1(Origin, [_Invalid|Rest])" \
+  "mixed_case_request_host_allowed_test" \
+  "mixed_case_configured_host_allowed_test" \
+  "mixed_case_near_miss_host_rejected_test" \
+  "malformed_configured_origin_rejected_test" \
+  "malformed_configured_entry_is_skipped_test"; do
+  if ! grep -Fq "$origin_case_contract" "$LISTENER" "$LISTENER_TESTS"; then
+    printf '%s\n' "Case-insensitive origin-host contract is missing: $origin_case_contract" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq "Status: Completed" "$ORIGIN_CASE_PLAN" ||
+  ! grep -Fq "19 listener tests pass" "$ORIGIN_CASE_PLAN"; then
+  printf '%s\n' "Origin host case-normalization plan must remain completed and runtime verified." >&2
+  exit 1
+fi
+
+if ! grep -Fq "case-insensitively" "$README" ||
+  ! grep -Fq "case-insensitively" "$SECURITY"; then
+  printf '%s\n' "README and SECURITY must document case-insensitive origin hosts." >&2
   exit 1
 fi
 
