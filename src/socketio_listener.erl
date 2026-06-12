@@ -200,17 +200,29 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
-verify_origin_1(_Origin, [{"*","*"}|_]) ->
-    true;
 verify_origin_1({Host, undefined}, Origins) ->
     verify_origin_1({Host, 80}, Origins);
-verify_origin_1({_Host, Port}, [{"*", Port}|_]) ->
-    true;
-verify_origin_1({Host, _Port}, [{Host, "*"}|_]) ->
-    true;
-verify_origin_1({Host, Port}, [{Host, Port}|_]) ->
-    true;
-verify_origin_1(Origin, [_|Rest]) ->
+verify_origin_1({Host, Port} = Origin, [{AllowedHost, AllowedPort}|Rest]) ->
+    case origin_host_matches(Host, AllowedHost) andalso
+         origin_port_matches(Port, AllowedPort) of
+        true -> true;
+        false -> verify_origin_1(Origin, Rest)
+    end;
+verify_origin_1(Origin, [_Invalid|Rest]) ->
     verify_origin_1(Origin, Rest);
 verify_origin_1(_Origin, []) ->
+    false.
+
+origin_host_matches(_Host, "*") ->
+    true;
+origin_host_matches(Host, AllowedHost) when is_list(Host), is_list(AllowedHost) ->
+    string:to_lower(Host) =:= string:to_lower(AllowedHost);
+origin_host_matches(_Host, _AllowedHost) ->
+    false.
+
+origin_port_matches(_Port, "*") ->
+    true;
+origin_port_matches(Port, Port) ->
+    true;
+origin_port_matches(_Port, _AllowedPort) ->
     false.

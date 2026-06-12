@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-12
+
+- Compare parsed and configured origin DNS hostnames case-insensitively while
+  preserving exact host boundaries, wildcard behavior, and port matching.
+- Fail closed for malformed configured origin host or port values.
+- Add EUnit and static baseline regressions for mixed-case and near-miss hosts.
+
 ## 2026-06-10
 
 - Restricted origin allow-list evaluation to fully consumed HTTP/HTTPS origins

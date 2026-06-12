@@ -59,7 +59,8 @@ Socket.IO 0.6 client branch used by the demos.
 - Origin values must be complete `http` or `https` origins without userinfo,
   paths, queries, fragments, trailing parser data, or invalid ports before
   transport handlers apply the configured allow-list. Omitted ports normalize
-  to 80 for HTTP and 443 for HTTPS.
+  to 80 for HTTP and 443 for HTTPS, and DNS hostnames compare
+  case-insensitively.
 - Malformed Socket.IO frames decode to an empty message list instead of
   crashing transport handlers.
 - Socket.IO frame bodies larger than 1 MiB are rejected during decode before
@@ -114,7 +115,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   broad origins unless callers provide a narrower `origins` option.
 - Origin checks accept only complete HTTP/HTTPS origins, reject userinfo and
   extra URI components, validate explicit ports, and apply scheme-correct
-  defaults before the configured allow-list.
+  defaults before the configured allow-list. Parsed and configured DNS
+  hostnames compare case-insensitively while near-miss names remain distinct.
 - Malformed Socket.IO frame input fails closed during decode.
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.
 - Frame length prefixes are digit-bounded before integer parsing.
@@ -146,6 +148,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `docs/plans/2026-06-10-ci-baseline.md` for the GitHub Actions baseline.
 - See `docs/plans/2026-06-10-web-origin-boundary.md` for canonical web-origin
   parsing and default-port handling.
+- See `docs/plans/2026-06-12-origin-host-case-normalization.md` for
+  case-insensitive DNS hostname matching in origin allow-lists.
 
 ## Contributing
 
