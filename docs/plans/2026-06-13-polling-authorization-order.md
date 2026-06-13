@@ -2,7 +2,7 @@
 title: Polling POST Authorization Order
 type: security
 date: 2026-06-13
-status: planned
+status: completed
 execution: code
 ---
 
@@ -40,3 +40,16 @@ spending work on attacker-controlled form data or Socket.IO frames.
 - Changing CORS allow-list semantics or Origin header cardinality rules.
 - Changing Socket.IO frame decoding, polling response formats, or HTTP routes.
 - Modernizing the legacy rebar or Socket.IO 0.6 dependency stack.
+
+## Verification
+
+- `python3 scripts/check-polling-authorization-order.py
+  src/socketio_transport_polling.erl` passed with Python 3.12.8.
+- Four hostile source mutations were rejected: moving body parsing before the
+  authorization branch, duplicating parsing, removing parsing, and removing
+  frame decoding.
+- `EARLING_STATIC_ONLY=1 make check` passed from the repository root and from an
+  external working directory.
+- EUnit was not executed locally because neither `erl` nor `escript` is
+  installed. The stacked pull request's bounded hosted check remains the
+  authoritative Erlang-capable validation.

@@ -53,6 +53,8 @@ ports normalize to 80 for HTTP and 443 for HTTPS before matching. Parsed and
 configured DNS hostnames compare case-insensitively, without treating suffixes
 or near-miss names as equal. Duplicate, empty, non-list, and comma-joined
 Origin headers fail closed before a transport emits CORS response headers.
+Polling POST bodies are not parsed or decoded until that Origin authorization
+succeeds.
 
 Socket.IO frame bodies are capped at 1 MiB before payload splitting so
 oversized declared frame lengths fail closed during decode.

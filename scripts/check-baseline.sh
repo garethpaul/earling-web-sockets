@@ -23,6 +23,8 @@ ORIGIN_PLAN="$ROOT_DIR/docs/plans/2026-06-10-web-origin-boundary.md"
 ORIGIN_CASE_PLAN="$ROOT_DIR/docs/plans/2026-06-12-origin-host-case-normalization.md"
 ORIGIN_HEADER_PLAN="$ROOT_DIR/docs/plans/2026-06-13-origin-header-cardinality.md"
 SUBMODULE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-socketio-submodule-identity.md"
+POLLING_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-13-polling-authorization-order.md"
+POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-polling-authorization-order.py"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -61,6 +63,8 @@ for path in \
   "docs/plans/2026-06-12-origin-host-case-normalization.md" \
   "docs/plans/2026-06-13-origin-header-cardinality.md" \
   "docs/plans/2026-06-13-socketio-submodule-identity.md" \
+  "docs/plans/2026-06-13-polling-authorization-order.md" \
+  "scripts/check-polling-authorization-order.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -69,6 +73,8 @@ for path in \
     exit 1
   fi
 done
+
+python3 "$POLLING_AUTH_CHECK" "$POLLING"
 
 if ! grep -Fq "Erlang/OTP" "$README" ||
   ! grep -Fq "escript" "$README" ||
@@ -379,6 +385,13 @@ if ! grep -Fq "status: completed" "$SUBMODULE_PLAN" ||
   ! grep -Fq "source from HTTPS to HTTP failed" "$SUBMODULE_PLAN" ||
   ! grep -Fq 'unreviewed `update` option failed' "$SUBMODULE_PLAN"; then
   printf '%s\n' "Socket.IO submodule identity plan must record completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$POLLING_AUTH_PLAN" ||
+  ! grep -Fq "EARLING_STATIC_ONLY=1 make check" "$POLLING_AUTH_PLAN" ||
+  ! grep -Fq "hostile source mutations were rejected" "$POLLING_AUTH_PLAN"; then
+  printf '%s\n' "Polling authorization-order plan must record completed verification." >&2
   exit 1
 fi
 

@@ -112,13 +112,13 @@ handle_call({_TransportType, data, Req}, From, #state{ server_module = ServerMod
                                                        event_manager = EventManager,
                                                        polling_duration = Interval,
                                                        sup = Sup } = State) ->
-    Msgs = [socketio_data:decode(#msg{content=Data}) || {"data", Data} <- ServerModule:parse_post(Req)],
     {Response, NewState} =
     case cors_headers(ServerModule:get_headers(Req), Sup) of
         {false, _Headers} ->
             Reply = gen_server:reply(From, ServerModule:respond(Req, 405, "unauthorized")),
             {Reply, State};
         {_, Headers} ->
+            Msgs = [socketio_data:decode(#msg{content=Data}) || {"data", Data} <- ServerModule:parse_post(Req)],
             F = fun(#heartbeat{}, _Acc) ->
                     {timer, reset_duration(Interval)};
                 (M, Acc) ->
