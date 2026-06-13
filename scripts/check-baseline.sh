@@ -21,6 +21,7 @@ CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
 CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
 ORIGIN_PLAN="$ROOT_DIR/docs/plans/2026-06-10-web-origin-boundary.md"
 ORIGIN_CASE_PLAN="$ROOT_DIR/docs/plans/2026-06-12-origin-host-case-normalization.md"
+ORIGIN_HEADER_PLAN="$ROOT_DIR/docs/plans/2026-06-13-origin-header-cardinality.md"
 SUBMODULE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-socketio-submodule-identity.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
@@ -58,6 +59,7 @@ for path in \
   "docs/plans/2026-06-10-ci-baseline.md" \
   "docs/plans/2026-06-10-web-origin-boundary.md" \
   "docs/plans/2026-06-12-origin-host-case-normalization.md" \
+  "docs/plans/2026-06-13-origin-header-cardinality.md" \
   "docs/plans/2026-06-13-socketio-submodule-identity.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
@@ -215,6 +217,45 @@ fi
 if ! grep -Fq "case-insensitively" "$README" ||
   ! grep -Fq "case-insensitively" "$SECURITY"; then
   printf '%s\n' "README and SECURITY must document case-insensitive origin hosts." >&2
+  exit 1
+fi
+
+for origin_header_contract in \
+  "verify_origin_headers(Headers, Origins)" \
+  "proplists:get_all_values('Origin', Headers)" \
+  'lists:member($,, Origin)' \
+  "missing_origin_header_is_absent_test" \
+  "single_origin_header_is_verified_test" \
+  "duplicate_origin_headers_are_rejected_test" \
+  "comma_joined_origin_header_is_rejected_test" \
+  "empty_origin_header_is_rejected_test" \
+  "non_list_origin_header_is_rejected_test"; do
+  if ! grep -Fq "$origin_header_contract" "$LISTENER" "$LISTENER_TESTS"; then
+    printf '%s\n' "Origin header cardinality contract is missing: $origin_header_contract" >&2
+    exit 1
+  fi
+done
+
+if [ "$(grep -Fc 'socketio_listener:verify_origin_headers' "$POLLING")" -ne 1 ] ||
+  [ "$(grep -Fc 'socketio_listener:verify_origin_headers' "$XHR_MULTIPART")" -ne 1 ] ||
+  grep -Fq "proplists:get_value('Origin', Headers)" "$POLLING" "$XHR_MULTIPART"; then
+  printf '%s\n' "CORS transports must use the shared Origin header verifier exactly once." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$ORIGIN_HEADER_PLAN" ||
+  ! grep -Fq "EUnit was not executed" "$ORIGIN_HEADER_PLAN" ||
+  ! grep -Fq "hostile mutations were rejected" "$ORIGIN_HEADER_PLAN"; then
+  printf '%s\n' "Origin header cardinality plan must record truthful completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "comma-joined Origin headers fail closed" "$README" ||
+  ! grep -Fq "comma-joined" "$SECURITY" ||
+  ! grep -Fq "comma-joined Origin headers fail closed" "$VISION" ||
+  ! grep -Fq "Origin header verification must reject" "$ROOT_DIR/AGENTS.md" ||
+  ! grep -Fq "Reject duplicate, empty, non-list, and comma-joined Origin headers" "$ROOT_DIR/CHANGES.md"; then
+  printf '%s\n' "Project guidance must document ambiguous Origin header rejection." >&2
   exit 1
 fi
 

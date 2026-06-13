@@ -2,6 +2,9 @@
 
 ## 2026-06-13
 
+- Reject duplicate, empty, non-list, and comma-joined Origin headers before
+  polling or XHR-multipart transports emit CORS response headers.
+- Route both CORS transport paths through one listener-owned header verifier.
 - Replaced the loose Socket.IO submodule branch check with a structured,
   fail-closed identity contract for its section, path, HTTPS URL, and branch.
 - Reject extra submodules and unreviewed submodule options in the static gate.

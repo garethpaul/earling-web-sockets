@@ -11,7 +11,7 @@
 -export([start/1, server/1]).
 -export([start_link/2]).
 -export([event_manager/1, origins/1, origins/2]).
--export([verify_origin/2]).
+-export([verify_origin/2, verify_origin_headers/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -62,6 +62,19 @@ origins(Server) ->
 
 origins(Server, Origins) ->
     gen_server:call(Server, {origins, Origins}).
+
+verify_origin_headers(Headers, Origins) ->
+    case proplists:get_all_values('Origin', Headers) of
+        [] ->
+            undefined;
+        [Origin] when is_list(Origin), Origin =/= [] ->
+            case lists:member($,, Origin) of
+                true -> false;
+                false -> verify_origin(Origin, Origins)
+            end;
+        _ ->
+            false
+    end.
 
 verify_origin(Origin, Origins) ->
     case catch ex_uri:decode(Origin) of

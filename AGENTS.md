@@ -46,6 +46,7 @@
 - Build outputs such as `ebin`, `.eunit`, `deps`, logs, and the populated `priv/Socket.IO` submodule checkout should stay untracked.
 - The default listener origin configuration in the legacy supervisor allows broad origins unless callers provide a narrower `origins` option.
 - Malformed or relative Origin values are rejected before transport handlers apply the configured origin allow-list.
+- Origin header verification must reject duplicate, empty, non-list, and comma-joined values before CORS headers are emitted.
 
 ## Agent workflow
 

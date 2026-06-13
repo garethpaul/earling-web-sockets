@@ -2,7 +2,7 @@
 title: Earling Origin Header Cardinality Boundary
 type: security
 date: 2026-06-13
-status: planned
+status: completed
 ---
 
 # Earling Origin Header Cardinality Boundary
@@ -60,16 +60,18 @@ this boundary as the next origin-validation priority.
   verification evidence mandatory.
 - **Covers:** R6
 
-## Verification Plan
+## Verification
 
-- Run `EARLING_STATIC_ONLY=1 make check`, shell syntax, and `git diff --check`.
-- If `erl` and `escript` are available, run the full `make check` and record the
-  listener test count; otherwise state that EUnit was not executed.
-- Apply isolated mutations for restored first-value selection, accepted
-  duplicate/comma-joined values, removed regressions, documentation drift, and
-  incomplete plan evidence.
-- Inspect exact paths, credential-like additions, dependency files, submodule
-  identity, and generated artifacts before committing.
+- `EARLING_STATIC_ONLY=1 make check`, shell syntax, and `git diff --check`
+  passed the dependency-free maintenance gate.
+- The listener suite now contains 25 EUnit cases, including six header-level
+  regressions. Erlang and `escript` are unavailable locally. EUnit was not executed,
+  and no runtime result is claimed.
+- Eight isolated hostile mutations were rejected for restored first-value
+  selection, removed duplicate or comma rejection, removed transport routing,
+  removed regressions, documentation drift, and incomplete plan evidence.
+- Exact-path, credential-like addition, unchanged dependency/submodule,
+  generated-artifact, and staged-path inspections passed.
 
 ## Risks
 

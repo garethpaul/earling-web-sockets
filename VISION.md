@@ -37,6 +37,8 @@ Current baseline:
   matching.
 - Origin allow-list hostnames compare case-insensitively while preserving exact
   hostname boundaries and explicit wildcard behavior.
+- Duplicate, empty, non-list, and comma-joined Origin headers fail closed before
+  polling or XHR-multipart transports emit CORS response headers.
 - Malformed Socket.IO frame input fails closed instead of crashing transport
   decode paths.
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.
@@ -57,7 +59,6 @@ Next priorities:
 
 - Add clear maintenance-status and supported-client notes
 - Verify the rebar build and tests on a documented Erlang version
-- Define and reject ambiguous duplicate or comma-joined Origin headers
 - Bound synchronous transport calls made by the central HTTP router
 - Document SSL demo certificate usage
 - Tighten contribution and known-issues sections that the README lists as TODOs

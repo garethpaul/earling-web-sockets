@@ -60,7 +60,8 @@ repository and the legacy Socket.IO `06` client branch required by the demos.
   paths, queries, fragments, trailing parser data, or invalid ports before
   transport handlers apply the configured allow-list. Omitted ports normalize
   to 80 for HTTP and 443 for HTTPS, and DNS hostnames compare
-  case-insensitively.
+  case-insensitively. Ambiguous duplicate or comma-joined Origin headers fail closed
+  before CORS response headers are emitted; empty and non-list values also fail.
 - Malformed Socket.IO frames decode to an empty message list instead of
   crashing transport handlers.
 - Socket.IO frame bodies larger than 1 MiB are rejected during decode before
@@ -118,6 +119,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   extra URI components, validate explicit ports, and apply scheme-correct
   defaults before the configured allow-list. Parsed and configured DNS
   hostnames compare case-insensitively while near-miss names remain distinct.
+  Ambiguous duplicate or comma-joined Origin headers are rejected instead of
+  selecting the first value.
 - Malformed Socket.IO frame input fails closed during decode.
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.
 - Frame length prefixes are digit-bounded before integer parsing.
@@ -151,6 +154,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   parsing and default-port handling.
 - See `docs/plans/2026-06-12-origin-host-case-normalization.md` for
   case-insensitive DNS hostname matching in origin allow-lists.
+- See `docs/plans/2026-06-13-origin-header-cardinality.md` for duplicate and
+  comma-joined Origin header rejection.
 
 ## Contributing
 

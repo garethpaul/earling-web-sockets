@@ -158,17 +158,12 @@ handle_call(stop, _From, State) ->
 handle_cast({initialize, Req}, #state{ server_module = ServerModule, heartbeat_interval = Interval } = State) ->
     Headers = ServerModule:get_headers(Req),
     Headers1 =
-    case proplists:get_value('Origin', Headers) of
-        undefined ->
-            Headers;
-        Origin ->
-            case socketio_listener:verify_origin(Origin, socketio_listener:origins(listener(State))) of
-                true ->
-                    [{"Access-Control-Allow-Origin", "*"},
-                     {"Access-Control-Allow-Credentials", "true"} | Headers];
-                false ->
-                    Headers
-            end
+    case socketio_listener:verify_origin_headers(Headers, socketio_listener:origins(listener(State))) of
+        true ->
+            [{"Access-Control-Allow-Origin", "*"},
+             {"Access-Control-Allow-Credentials", "true"} | Headers];
+        _ ->
+            Headers
     end,
     link(ServerModule:socket(Req)),
     ServerModule:headers(Req, [{"Content-Type", "multipart/x-mixed-replace;boundary=\"socketio\""},
