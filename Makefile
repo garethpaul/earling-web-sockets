@@ -1,5 +1,7 @@
 .PHONY: all deps compile lint test verify check check-tools force
 
+ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+
 all: compile
 
 check-tools:
@@ -7,18 +9,18 @@ check-tools:
 	@command -v escript >/dev/null 2>&1 || { echo "Erlang/OTP 'escript' is required. Install Erlang before running legacy rebar tasks."; exit 127; }
 
 deps: check-tools
-	@./rebar get-deps
+	@"$(ROOT)/rebar" get-deps
 
 compile: deps
-	@./rebar compile
+	@"$(ROOT)/rebar" compile
 
 test: check-tools force
-	@./rebar eunit skip_deps=true
+	@"$(ROOT)/rebar" eunit skip_deps=true
 
 lint: verify
 
 verify:
-	@./scripts/check-baseline.sh
+	@"$(ROOT)/scripts/check-baseline.sh"
 
 check: verify
 

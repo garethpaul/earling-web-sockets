@@ -2,6 +2,8 @@
 
 ## 2026-06-13
 
+- Rooted Make targets to the loaded Makefile so the checker and bundled rebar
+  resolve correctly from external working directories.
 - Reject duplicate, empty, non-list, and comma-joined Origin headers before
   polling or XHR-multipart transports emit CORS response headers.
 - Route both CORS transport paths through one listener-owned header verifier.

@@ -88,6 +88,8 @@ scripts/check-baseline.sh
 static baseline. When Erlang/OTP is installed, the baseline gate runs
 `make test`. In documentation-only environments without `erl`/`escript`, it
 performs static guard checks and reports that the rebar tests were skipped.
+Make targets resolve repository tools from the loaded Makefile, so an absolute
+Makefile path can be used from another working directory.
 GitHub Actions runs the static portion of `make check` through
 `.github/workflows/check.yml` on pushes, pull requests, and manual dispatches.
 The workflow pins checkout by commit on Ubuntu 24.04, disables checkout

@@ -1,6 +1,6 @@
 # Make Verification Location Independent
 
-status: in progress
+status: completed
 
 ## Context
 
@@ -41,3 +41,19 @@ records an external-working-directory pass.
 
 - Runtime rebar behavior remains unverified locally until Erlang/OTP is
   installed; this change only corrects path resolution before that tool gate.
+
+## Work Completed
+
+- Rooted checker and bundled rebar invocations to the loaded Makefile path.
+- Added static contracts and project guidance for caller-independent targets.
+- Preserved the existing Erlang/escript preflight and static-only behavior.
+
+## Verification Completed
+
+- `EARLING_STATIC_ONLY=1 make check` passed from the repository root and an
+  external working directory using the absolute Makefile path.
+- Six isolated hostile mutations were rejected across root derivation, checker
+  and rebar paths, guidance, changelog, and plan status.
+- Shell syntax and `git diff --check` passed.
+- `make test` reached the explicit missing-tool gate; EUnit was not executed
+  because Erlang and escript are unavailable locally.

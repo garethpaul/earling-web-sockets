@@ -44,6 +44,7 @@
 - The only tracked certificate/key files are `demo/test_certificate.pem` and `demo/test_privkey.pem`; both are test-only local demo fixtures.
 - Do not commit production certificates, private keys, tokens, or local rebar dependency caches.
 - Build outputs such as `ebin`, `.eunit`, `deps`, logs, and the populated `priv/Socket.IO` submodule checkout should stay untracked.
+- Make targets resolve repository tools from the loaded Makefile and must remain usable from external working directories.
 - The default listener origin configuration in the legacy supervisor allows broad origins unless callers provide a narrower `origins` option.
 - Malformed or relative Origin values are rejected before transport handlers apply the configured origin allow-list.
 - Origin header verification must reject duplicate, empty, non-list, and comma-joined values before CORS headers are emitted.

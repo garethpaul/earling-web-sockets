@@ -28,6 +28,8 @@ Current baseline:
   canonical `priv/Socket.IO` path, LearnBoost HTTPS URL, and `06` branch.
 - `make deps`, `make`, and `make test` now verify `erl` and `escript` before
   invoking legacy `rebar`.
+- Keep location-independent Make targets rooted to the loaded repository
+  Makefile for checker and bundled rebar invocation.
 - `scripts/check-baseline.sh` runs full rebar tests when Erlang/OTP is
   available and static maintenance checks otherwise.
 - Malformed or relative Origin values fail closed instead of crashing listener

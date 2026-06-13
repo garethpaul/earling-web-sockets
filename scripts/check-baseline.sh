@@ -24,6 +24,7 @@ ORIGIN_CASE_PLAN="$ROOT_DIR/docs/plans/2026-06-12-origin-host-case-normalization
 ORIGIN_HEADER_PLAN="$ROOT_DIR/docs/plans/2026-06-13-origin-header-cardinality.md"
 SUBMODULE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-socketio-submodule-identity.md"
 POLLING_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-13-polling-authorization-order.md"
+LOCATION_MAKE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-location-independent-make.md"
 POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-polling-authorization-order.py"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
@@ -64,6 +65,7 @@ for path in \
   "docs/plans/2026-06-13-origin-header-cardinality.md" \
   "docs/plans/2026-06-13-socketio-submodule-identity.md" \
   "docs/plans/2026-06-13-polling-authorization-order.md" \
+  "docs/plans/2026-06-13-location-independent-make.md" \
   "scripts/check-polling-authorization-order.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
@@ -134,9 +136,29 @@ fi
 
 if ! grep -Fq "command -v erl" "$MAKEFILE" ||
   ! grep -Fq "command -v escript" "$MAKEFILE" ||
+  ! grep -Fq 'ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))' "$MAKEFILE" ||
+  [ "$(grep -Fc '"$(ROOT)/rebar"' "$MAKEFILE")" -ne 3 ] ||
+  [ "$(grep -Fc '"$(ROOT)/scripts/check-baseline.sh"' "$MAKEFILE")" -ne 1 ] ||
   ! grep -Fq "lint: verify" "$MAKEFILE" ||
   ! grep -Fq "check: verify" "$MAKEFILE"; then
   printf '%s\n' "Makefile must preflight Erlang erl/escript before rebar targets and expose make lint/check." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$LOCATION_MAKE_PLAN" ||
+  ! grep -Fq "external working directory" "$LOCATION_MAKE_PLAN" ||
+  ! grep -Fq "hostile mutations were rejected" "$LOCATION_MAKE_PLAN" ||
+  ! grep -Fq "EUnit was not executed" "$LOCATION_MAKE_PLAN"; then
+  printf '%s\n' "Location-independent Make plan must record completed verification and runtime limits." >&2
+  exit 1
+fi
+
+if ! grep -Fq "absolute" "$README" ||
+  ! grep -Fq "Makefile path" "$README" ||
+  ! grep -Fq "location-independent Make targets" "$VISION" ||
+  ! grep -Fq "Rooted Make targets" "$ROOT_DIR/CHANGES.md" ||
+  ! grep -Fq "Make targets resolve repository tools" "$ROOT_DIR/AGENTS.md"; then
+  printf '%s\n' "Project guidance must document location-independent Make verification." >&2
   exit 1
 fi
 
