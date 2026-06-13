@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-13
+
+- Replaced the loose Socket.IO submodule branch check with a structured,
+  fail-closed identity contract for its section, path, HTTPS URL, and branch.
+- Reject extra submodules and unreviewed submodule options in the static gate.
+
 ## 2026-06-12
 
 - Compare parsed and configured origin DNS hostnames case-insensitively while

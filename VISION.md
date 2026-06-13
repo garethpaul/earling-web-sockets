@@ -24,6 +24,8 @@ Priority:
 
 Current baseline:
 
+- The legacy browser client is the only submodule and remains fixed to its
+  canonical `priv/Socket.IO` path, LearnBoost HTTPS URL, and `06` branch.
 - `make deps`, `make`, and `make test` now verify `erl` and `escript` before
   invoking legacy `rebar`.
 - `scripts/check-baseline.sh` runs full rebar tests when Erlang/OTP is

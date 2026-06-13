@@ -45,15 +45,15 @@ git submodule update --init
 make deps
 ```
 
-The `priv/Socket.IO` submodule is intentionally pinned to the legacy
-Socket.IO 0.6 client branch used by the demos.
+The only submodule is `priv/Socket.IO`, using the canonical LearnBoost HTTPS
+repository and the legacy Socket.IO `06` client branch required by the demos.
 
 ## Running or Using the Project
 
 - Run `make` to fetch legacy rebar dependencies and compile the Erlang app.
 - Run `make test` to execute the rebar EUnit path when Erlang/OTP is available.
 - The Socket.IO browser client submodule remains pinned to the legacy `06`
-  branch for protocol compatibility.
+  branch at its canonical HTTPS repository and path for protocol compatibility.
 - Demo certificates under `demo/test_certificate.pem` and
   `demo/test_privkey.pem` are test-only material for local SSL demos.
 - Origin values must be complete `http` or `https` origins without userinfo,

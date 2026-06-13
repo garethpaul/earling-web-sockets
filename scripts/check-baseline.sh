@@ -21,6 +21,7 @@ CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
 CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
 ORIGIN_PLAN="$ROOT_DIR/docs/plans/2026-06-10-web-origin-boundary.md"
 ORIGIN_CASE_PLAN="$ROOT_DIR/docs/plans/2026-06-12-origin-host-case-normalization.md"
+SUBMODULE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-socketio-submodule-identity.md"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -57,6 +58,7 @@ for path in \
   "docs/plans/2026-06-10-ci-baseline.md" \
   "docs/plans/2026-06-10-web-origin-boundary.md" \
   "docs/plans/2026-06-12-origin-host-case-normalization.md" \
+  "docs/plans/2026-06-13-socketio-submodule-identity.md" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -311,8 +313,38 @@ if [ "$demo_port_count" -ne 1 ]; then
   exit 1
 fi
 
-if ! grep -Fq "branch = 06" "$ROOT_DIR/.gitmodules"; then
-  printf '%s\n' "Socket.IO client submodule must remain pinned to the legacy 06 branch." >&2
+python3 - "$ROOT_DIR/.gitmodules" <<'PY'
+import configparser
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+config = configparser.ConfigParser(interpolation=None)
+config.read(path)
+expected_section = 'submodule "priv/Socket.IO"'
+if config.sections() != [expected_section]:
+    raise SystemExit("Exactly one canonical Socket.IO submodule section is required.")
+expected = {
+    "path": "priv/Socket.IO",
+    "url": "https://github.com/LearnBoost/socket.io-client.git",
+    "branch": "06",
+}
+if dict(config[expected_section]) != expected:
+    raise SystemExit("Socket.IO submodule path, HTTPS URL, and branch must remain canonical.")
+PY
+
+if ! grep -Fq "status: completed" "$SUBMODULE_PLAN" ||
+  ! grep -Fq "EARLING_STATIC_ONLY=1 make check" "$SUBMODULE_PLAN" ||
+  ! grep -Fq "source from HTTPS to HTTP failed" "$SUBMODULE_PLAN" ||
+  ! grep -Fq 'unreviewed `update` option failed' "$SUBMODULE_PLAN"; then
+  printf '%s\n' "Socket.IO submodule identity plan must record completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "only submodule" "$README" ||
+  ! grep -Fq "exactly one submodule" "$SECURITY" ||
+  ! grep -Fq "only submodule" "$VISION"; then
+  printf '%s\n' "Project guidance must document the canonical submodule identity." >&2
   exit 1
 fi
 
