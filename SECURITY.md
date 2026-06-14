@@ -1,5 +1,7 @@
 # Security Policy
 
+WebSocket upgrades authorize Origin headers before creating sessions.
+
 ## Supported Versions
 
 The supported security scope for `earling-web-sockets` is the current default branch, `master`. Older commits, tags, branches, forks, demos, and generated artifacts are not actively supported unless the repository explicitly marks them as maintained.

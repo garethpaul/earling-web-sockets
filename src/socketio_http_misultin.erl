@@ -86,8 +86,14 @@ handle_websocket_1(Server, Resource, ["flashsocket"|Resource], Ws) ->
     handle_websocket_1(Server, Resource, ["websocket"|Resource], Ws);
 
 handle_websocket_1(Server, Resource, ["websocket"|Resource], Ws) ->
-    {SessionID, Pid} = gen_server:call(Server, {session, generate, {websocket, Ws}, socketio_transport_websocket}),
-    handle_websocket(Server, Ws, SessionID, Pid);
+    Headers = misultin_ws:get(headers, Ws),
+    case gen_server:call(Server, {websocket, authorize, Headers}) of
+        false ->
+            ignore;
+        _ ->
+            {SessionID, Pid} = gen_server:call(Server, {session, generate, {websocket, Ws}, socketio_transport_websocket}),
+            handle_websocket(Server, Ws, SessionID, Pid)
+    end;
 handle_websocket_1(_Server, _Resource, _WsResource, _Ws) ->
     ignore. %% FIXME: pass it through to the end user?
 
@@ -101,4 +107,3 @@ handle_websocket(Server, Ws, SessionID, Pid) ->
         _Ignore ->
             handle_websocket(Server, Ws, SessionID, Pid)
     end.
-

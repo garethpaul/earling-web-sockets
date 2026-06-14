@@ -204,6 +204,12 @@ handle_call({request, Method, Path, Req}, _From, #state{ default_http_handler = 
     {reply, Response, State};
 
 %% Sessions
+handle_call({websocket, authorize, Headers}, _From, State) ->
+    Authorized = socketio_listener:verify_origin_headers(
+        Headers,
+        socketio_listener:origins(listener(State))),
+    {reply, Authorized, State};
+
 handle_call({session, generate, ConnectionReference, Transport}, _From, #state{ 
                                                                    sup = Sup,
                                                                    sessions = Sessions,
