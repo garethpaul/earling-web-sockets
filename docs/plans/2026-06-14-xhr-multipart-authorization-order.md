@@ -2,7 +2,7 @@
 title: XHR Multipart POST Authorization Order
 type: security
 date: 2026-06-14
-status: planned
+status: completed
 execution: code
 ---
 
@@ -31,11 +31,23 @@ without spending work on attacker-controlled form data or Socket.IO frames.
 - Changing polling, htmlfile, websocket, or XHR multipart response formats.
 - Modernizing legacy rebar or Socket.IO 0.6 dependencies.
 
-## Planned Verification
+## Work Completed
 
-- Focused authorization-order static contract.
-- Isolated hostile source mutations.
-- `EARLING_STATIC_ONLY=1 make check` from repository and external directories.
-- `make test` when `erl` and `escript` are available.
+- Added shared Origin verification before the XHR multipart POST body path.
+- Preserved allowed and absent-Origin message, heartbeat, timer, and response
+  behavior while returning the legacy `405 unauthorized` response for a
+  disallowed Origin.
+- Added a focused source-order contract and wired it into the repository gate.
+- Updated contributor, security, vision, change, and maintenance guidance.
+
+## Verification
+
+- Python 3.12.8: the focused authorization-order contract passed.
+- Five hostile source mutations were rejected: early parsing, duplicate parsing,
+  missing parsing, missing decoding, and removal of the unauthorized response.
+- `EARLING_STATIC_ONLY=1 make check` passed from the repository root and through
+  the absolute Makefile path from an external working directory.
+- Local `make test` is unavailable because neither `erl` nor `escript` is
+  installed; the hosted Erlang-capable check remains required.
 - Exact intended-path, artifact, whitespace, conflict-marker, and changed-line
-  credential-pattern audits.
+  credential-pattern audits passed before commit.

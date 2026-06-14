@@ -25,7 +25,9 @@ ORIGIN_HEADER_PLAN="$ROOT_DIR/docs/plans/2026-06-13-origin-header-cardinality.md
 SUBMODULE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-socketio-submodule-identity.md"
 POLLING_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-13-polling-authorization-order.md"
 LOCATION_MAKE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-location-independent-make.md"
+XHR_MULTIPART_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-xhr-multipart-authorization-order.md"
 POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-polling-authorization-order.py"
+XHR_MULTIPART_AUTH_CHECK="$ROOT_DIR/scripts/check-xhr-multipart-authorization-order.py"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -67,6 +69,8 @@ for path in \
   "docs/plans/2026-06-13-polling-authorization-order.md" \
   "docs/plans/2026-06-13-location-independent-make.md" \
   "scripts/check-polling-authorization-order.py" \
+  "docs/plans/2026-06-14-xhr-multipart-authorization-order.md" \
+  "scripts/check-xhr-multipart-authorization-order.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -77,6 +81,7 @@ for path in \
 done
 
 python3 "$POLLING_AUTH_CHECK" "$POLLING"
+python3 "$XHR_MULTIPART_AUTH_CHECK" "$XHR_MULTIPART"
 
 if ! grep -Fq "Erlang/OTP" "$README" ||
   ! grep -Fq "escript" "$README" ||
@@ -265,9 +270,9 @@ for origin_header_contract in \
 done
 
 if [ "$(grep -Fc 'socketio_listener:verify_origin_headers' "$POLLING")" -ne 1 ] ||
-  [ "$(grep -Fc 'socketio_listener:verify_origin_headers' "$XHR_MULTIPART")" -ne 1 ] ||
+  [ "$(grep -Fc 'socketio_listener:verify_origin_headers' "$XHR_MULTIPART")" -ne 2 ] ||
   grep -Fq "proplists:get_value('Origin', Headers)" "$POLLING" "$XHR_MULTIPART"; then
-  printf '%s\n' "CORS transports must use the shared Origin header verifier exactly once." >&2
+  printf '%s\n' "CORS transports must use the shared Origin header verifier at each guarded request boundary." >&2
   exit 1
 fi
 
@@ -414,6 +419,13 @@ if ! grep -Fq "status: completed" "$POLLING_AUTH_PLAN" ||
   ! grep -Fq "EARLING_STATIC_ONLY=1 make check" "$POLLING_AUTH_PLAN" ||
   ! grep -Fq "hostile source mutations were rejected" "$POLLING_AUTH_PLAN"; then
   printf '%s\n' "Polling authorization-order plan must record completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$XHR_MULTIPART_AUTH_PLAN" ||
+  ! grep -Fq "EARLING_STATIC_ONLY=1 make check" "$XHR_MULTIPART_AUTH_PLAN" ||
+  ! grep -Fq "hostile source mutations were rejected" "$XHR_MULTIPART_AUTH_PLAN"; then
+  printf '%s\n' "XHR multipart authorization-order plan must record completed verification." >&2
   exit 1
 fi
 

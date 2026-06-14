@@ -42,6 +42,7 @@ Current baseline:
 - Duplicate, empty, non-list, and comma-joined Origin headers fail closed before
   polling or XHR-multipart transports emit CORS response headers.
 - Polling POST bodies are parsed and decoded only after Origin authorization.
+- XHR multipart POST bodies reject disallowed origins before parsing or decode.
 - Malformed Socket.IO frame input fails closed instead of crashing transport
   decode paths.
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.

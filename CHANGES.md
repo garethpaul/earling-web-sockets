@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-14
+
+- Reject disallowed XHR multipart POST origins before parsing form data or
+  decoding Socket.IO frames.
+
 ## 2026-06-13
 
 - Rooted Make targets to the loaded Makefile so the checker and bundled rebar

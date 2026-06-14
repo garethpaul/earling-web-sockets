@@ -111,22 +111,30 @@ init([Sup, SessionId, ServerModule, {'xhr-multipart', {Req, Caller}}]) ->
 %% Incoming data
 handle_call({'xhr-multipart', data, Req}, _From, #state{ server_module = ServerModule,
                                                          heartbeat_interval = Interval,
-                                                         event_manager = EventManager } = State) ->
-    Msgs = [socketio_data:decode(#msg{content=Data}) || {"data", Data} <- ServerModule:parse_post(Req)],
-    F = fun(#heartbeat{}, _Acc) ->
-            {timer, reset_heartbeat(Interval)};
-        (M, Acc) ->
-            gen_event:notify(EventManager, {message, self(), M}),
-            Acc
-    end,
-    NewState = case lists:foldl(F, undefined, lists:flatten(Msgs)) of
-        {timer, NewInterval} ->
-            State#state{ heartbeat_interval = NewInterval};
-        undefined ->
-            State
-    end,
-    ServerModule:respond(Req, 200, [{"Content-Type", "text/plain"}], "ok"),
-    {reply, ok, NewState};
+                                                         event_manager = EventManager,
+                                                         sup = Sup } = State) ->
+    case socketio_listener:verify_origin_headers(ServerModule:get_headers(Req),
+                                                  socketio_listener:origins(Sup)) of
+        false ->
+            ServerModule:respond(Req, 405, "unauthorized"),
+            {reply, ok, State};
+        _ ->
+            Msgs = [socketio_data:decode(#msg{content=Data}) || {"data", Data} <- ServerModule:parse_post(Req)],
+            F = fun(#heartbeat{}, _Acc) ->
+                    {timer, reset_heartbeat(Interval)};
+                (M, Acc) ->
+                    gen_event:notify(EventManager, {message, self(), M}),
+                    Acc
+            end,
+            NewState = case lists:foldl(F, undefined, lists:flatten(Msgs)) of
+                {timer, NewInterval} ->
+                    State#state{ heartbeat_interval = NewInterval};
+                undefined ->
+                    State
+            end,
+            ServerModule:respond(Req, 200, [{"Content-Type", "text/plain"}], "ok"),
+            {reply, ok, NewState}
+    end;
 
 %% Event management
 handle_call(event_manager, _From, #state{ event_manager = EventMgr } = State) ->
