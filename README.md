@@ -62,7 +62,7 @@ repository and the legacy Socket.IO `06` client branch required by the demos.
   to 80 for HTTP and 443 for HTTPS, and DNS hostnames compare
   case-insensitively. Ambiguous duplicate or comma-joined Origin headers fail closed
   before CORS response headers are emitted; empty and non-list values also fail.
-  Polling and XHR multipart POST bodies are parsed and decoded only after this
+  Polling, XHR multipart, and HTMLFile POST bodies are parsed and decoded only after this
   authorization succeeds.
 - Malformed Socket.IO frames decode to an empty message list instead of
   crashing transport handlers.
@@ -164,6 +164,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   authorization ordering.
 - See `docs/plans/2026-06-14-xhr-multipart-authorization-order.md` for XHR
   multipart POST authorization ordering.
+- See `docs/plans/2026-06-14-htmlfile-authorization-order.md` for HTMLFile POST
+  authorization ordering.
 
 ## Contributing
 

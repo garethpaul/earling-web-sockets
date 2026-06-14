@@ -43,6 +43,7 @@ Current baseline:
   polling or XHR-multipart transports emit CORS response headers.
 - Polling POST bodies are parsed and decoded only after Origin authorization.
 - XHR multipart POST bodies reject disallowed origins before parsing or decode.
+- HTMLFile POST bodies reject disallowed origins before parsing or decode.
 - Malformed Socket.IO frame input fails closed instead of crashing transport
   decode paths.
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.

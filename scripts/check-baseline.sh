@@ -26,8 +26,10 @@ SUBMODULE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-socketio-submodule-identity.md"
 POLLING_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-13-polling-authorization-order.md"
 LOCATION_MAKE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-location-independent-make.md"
 XHR_MULTIPART_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-xhr-multipart-authorization-order.md"
+HTMLFILE_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-htmlfile-authorization-order.md"
 POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-polling-authorization-order.py"
 XHR_MULTIPART_AUTH_CHECK="$ROOT_DIR/scripts/check-xhr-multipart-authorization-order.py"
+HTMLFILE_AUTH_CHECK="$ROOT_DIR/scripts/check-htmlfile-authorization-order.py"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -71,6 +73,8 @@ for path in \
   "scripts/check-polling-authorization-order.py" \
   "docs/plans/2026-06-14-xhr-multipart-authorization-order.md" \
   "scripts/check-xhr-multipart-authorization-order.py" \
+  "docs/plans/2026-06-14-htmlfile-authorization-order.md" \
+  "scripts/check-htmlfile-authorization-order.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -82,6 +86,7 @@ done
 
 python3 "$POLLING_AUTH_CHECK" "$POLLING"
 python3 "$XHR_MULTIPART_AUTH_CHECK" "$XHR_MULTIPART"
+python3 "$HTMLFILE_AUTH_CHECK" "$HTMLFILE"
 
 if ! grep -Fq "Erlang/OTP" "$README" ||
   ! grep -Fq "escript" "$README" ||
@@ -426,6 +431,13 @@ if ! grep -Fq "status: completed" "$XHR_MULTIPART_AUTH_PLAN" ||
   ! grep -Fq "EARLING_STATIC_ONLY=1 make check" "$XHR_MULTIPART_AUTH_PLAN" ||
   ! grep -Fq "hostile source mutations were rejected" "$XHR_MULTIPART_AUTH_PLAN"; then
   printf '%s\n' "XHR multipart authorization-order plan must record completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$HTMLFILE_AUTH_PLAN" ||
+  ! grep -Fq "EARLING_STATIC_ONLY=1 make check" "$HTMLFILE_AUTH_PLAN" ||
+  ! grep -Fq "hostile source mutations were rejected" "$HTMLFILE_AUTH_PLAN"; then
+  printf '%s\n' "HTMLFile authorization-order plan must record completed verification." >&2
   exit 1
 fi
 

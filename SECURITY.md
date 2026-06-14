@@ -57,6 +57,8 @@ Polling POST bodies are not parsed or decoded until that Origin authorization
 succeeds.
 XHR multipart POST bodies follow the same fail-closed ordering and return the
 legacy unauthorized response before parsing disallowed requests.
+HTMLFile POST bodies also authorize first and return the legacy unauthorized
+response without parsing or decoding disallowed requests.
 
 Socket.IO frame bodies are capped at 1 MiB before payload splitting so
 oversized declared frame lengths fail closed during decode.

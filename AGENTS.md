@@ -48,7 +48,7 @@
 - The default listener origin configuration in the legacy supervisor allows broad origins unless callers provide a narrower `origins` option.
 - Malformed or relative Origin values are rejected before transport handlers apply the configured origin allow-list.
 - Origin header verification must reject duplicate, empty, non-list, and comma-joined values before CORS headers are emitted.
-- Polling and XHR multipart POST handlers must authorize Origin headers before
+- Polling, XHR multipart, and HTMLFile POST handlers must authorize Origin headers before
   parsing or decoding request bodies.
 
 ## Agent workflow
