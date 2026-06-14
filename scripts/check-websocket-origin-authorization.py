@@ -13,7 +13,7 @@ for contract in contracts:
         raise SystemExit(f"WebSocket authorization contract must contain one {contract!r}.")
 if not all(handler.index(a) < handler.index(b) for a, b in zip(contracts, contracts[1:])):
     raise SystemExit("WebSocket Origin authorization must precede session generation.")
-server = http.split("handle_call({websocket, authorize, Headers}", 1)[1].split("%% Sessions", 1)[0]
+server = http.split("handle_call({websocket, authorize, Headers}", 1)[1].split("handle_call({session, generate", 1)[0]
 for contract in ("socketio_listener:verify_origin_headers(", "socketio_listener:origins(listener(State))"):
     if server.count(contract) != 1:
         raise SystemExit(f"HTTP WebSocket authorization must retain {contract!r}.")

@@ -41,6 +41,7 @@
 ## Safety and gotchas
 
 - WebSocket upgrades authorize Origin headers before creating sessions.
+- New HTTP transport requests authorize Origin headers before creating sessions.
 
 - The SSL demo certificate and private key are checked in for local testing only.
 - The only tracked certificate/key files are `demo/test_certificate.pem` and `demo/test_privkey.pem`; both are test-only local demo fixtures.

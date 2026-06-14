@@ -28,10 +28,12 @@ LOCATION_MAKE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-location-independent-make.md
 XHR_MULTIPART_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-xhr-multipart-authorization-order.md"
 HTMLFILE_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-htmlfile-authorization-order.md"
 WEBSOCKET_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-websocket-origin-authorization.md"
+HTTP_SESSION_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-http-session-origin-authorization.md"
 POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-polling-authorization-order.py"
 XHR_MULTIPART_AUTH_CHECK="$ROOT_DIR/scripts/check-xhr-multipart-authorization-order.py"
 HTMLFILE_AUTH_CHECK="$ROOT_DIR/scripts/check-htmlfile-authorization-order.py"
 WEBSOCKET_AUTH_CHECK="$ROOT_DIR/scripts/check-websocket-origin-authorization.py"
+HTTP_SESSION_AUTH_CHECK="$ROOT_DIR/scripts/check-http-session-origin-authorization.py"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -39,6 +41,7 @@ WEBSOCKET="$ROOT_DIR/src/socketio_transport_websocket.erl"
 XHR_MULTIPART="$ROOT_DIR/src/socketio_transport_xhr_multipart.erl"
 HTMLFILE="$ROOT_DIR/src/socketio_transport_htmlfile.erl"
 POLLING="$ROOT_DIR/src/socketio_transport_polling.erl"
+HTTP="$ROOT_DIR/src/socketio_http.erl"
 DEMO="$ROOT_DIR/demo/demo.erl"
 
 for path in \
@@ -79,6 +82,8 @@ for path in \
   "scripts/check-htmlfile-authorization-order.py" \
   "docs/plans/2026-06-14-websocket-origin-authorization.md" \
   "scripts/check-websocket-origin-authorization.py" \
+  "docs/plans/2026-06-14-http-session-origin-authorization.md" \
+  "scripts/check-http-session-origin-authorization.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -92,9 +97,21 @@ python3 "$POLLING_AUTH_CHECK" "$POLLING"
 python3 "$XHR_MULTIPART_AUTH_CHECK" "$XHR_MULTIPART"
 python3 "$HTMLFILE_AUTH_CHECK" "$HTMLFILE"
 python3 "$WEBSOCKET_AUTH_CHECK" "$ROOT_DIR/src/socketio_http_misultin.erl" "$ROOT_DIR/src/socketio_http.erl"
+python3 "$HTTP_SESSION_AUTH_CHECK" "$HTTP"
 
 for websocket_auth_doc in AGENTS.md README.md SECURITY.md VISION.md CHANGES.md; do
   grep -Fq "WebSocket upgrades authorize Origin headers before creating sessions." "$ROOT_DIR/$websocket_auth_doc" || exit 1
+done
+for http_session_auth_doc in AGENTS.md README.md SECURITY.md VISION.md CHANGES.md; do
+  grep -Fq "New HTTP transport requests authorize Origin headers before creating sessions." "$ROOT_DIR/$http_session_auth_doc" || exit 1
+done
+for http_session_plan_contract in \
+  "Status: Completed" \
+  "## Work Completed" \
+  "## Verification Completed" \
+  "Eight hostile mutations were rejected" \
+  "Erlang EUnit was unavailable locally"; do
+  grep -Fq "$http_session_plan_contract" "$HTTP_SESSION_AUTH_PLAN" || exit 1
 done
 for contract in "Status: Completed" "make check" "hostile mutations"; do
   grep -Fq "$contract" "$WEBSOCKET_AUTH_PLAN" || exit 1

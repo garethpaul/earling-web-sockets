@@ -1,6 +1,7 @@
 # Security Policy
 
 WebSocket upgrades authorize Origin headers before creating sessions.
+New HTTP transport requests authorize Origin headers before creating sessions.
 
 ## Supported Versions
 

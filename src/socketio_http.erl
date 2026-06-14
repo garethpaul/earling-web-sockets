@@ -94,8 +94,14 @@ handle_call({request, 'GET', ["WebSocketMain.swf", "web-socket-js", "vendor", "l
     {reply, Response, State};
 
 %% New XHR Polling request
-handle_call({request, 'GET', [_Random, "xhr-polling"|Resource], Req }, From, #state{ resource = Resource} = State) ->
-    handle_call({session, generate, {'xhr-polling', Req}, socketio_transport_polling}, From, State);
+handle_call({request, 'GET', [_Random, "xhr-polling"|Resource], Req }, From,
+            #state{ resource = Resource, server_module = ServerModule } = State) ->
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        true ->
+            handle_call({session, generate, {'xhr-polling', Req}, socketio_transport_polling}, From, State)
+    end;
 
 %% Returning XHR Polling
 handle_call({request, 'GET', [_Random, SessionId, "xhr-polling"|Resource], Req }, From, 
@@ -123,8 +129,14 @@ handle_call({request, 'POST', ["send", SessionId, "xhr-polling"|Resource], Req }
     {reply, Response, State};
 
 %% New JSONP Polling request
-handle_call({request, 'GET', [Index, _Random, "jsonp-polling"|Resource], Req }, From, #state{ resource = Resource} = State) ->
-    handle_call({session, generate, {'jsonp-polling', {Req, Index}}, socketio_transport_polling}, From, State);
+handle_call({request, 'GET', [Index, _Random, "jsonp-polling"|Resource], Req }, From,
+            #state{ resource = Resource, server_module = ServerModule } = State) ->
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        true ->
+            handle_call({session, generate, {'jsonp-polling', {Req, Index}}, socketio_transport_polling}, From, State)
+    end;
 
 %% Returning JSONP Polling
 handle_call({request, 'GET', [Index, _Random, SessionId, "jsonp-polling"|Resource], Req }, From, 
@@ -154,9 +166,15 @@ handle_call({request, 'POST', [_Index, _Random, SessionId, "jsonp-polling"|Resou
     {reply, Response, State};
 
 %% New XHR Multipart request
-handle_call({request, 'GET', ["xhr-multipart"|Resource], Req }, From, #state{ resource = Resource} = State) ->
-    handle_call({session, generate, {'xhr-multipart', {Req, From}}, socketio_transport_xhr_multipart}, From, State),
-    {noreply, State};
+handle_call({request, 'GET', ["xhr-multipart"|Resource], Req }, From,
+            #state{ resource = Resource, server_module = ServerModule } = State) ->
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        true ->
+            handle_call({session, generate, {'xhr-multipart', {Req, From}}, socketio_transport_xhr_multipart}, From, State),
+            {noreply, State}
+    end;
 
 %% Incoming XHR Multipart data
 handle_call({request, 'POST', ["send", SessionId, "xhr-multipart"|Resource], Req }, _From, 
@@ -174,9 +192,15 @@ handle_call({request, 'POST', ["send", SessionId, "xhr-multipart"|Resource], Req
 
 
 %% New htmlfile request
-handle_call({request, 'GET', [_Random, "htmlfile"|Resource], Req }, From, #state{ resource = Resource} = State) ->
-    handle_call({session, generate, {'htmlfile', {Req, From}}, socketio_transport_htmlfile}, From, State),
-    {noreply, State};
+handle_call({request, 'GET', [_Random, "htmlfile"|Resource], Req }, From,
+            #state{ resource = Resource, server_module = ServerModule } = State) ->
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        true ->
+            handle_call({session, generate, {'htmlfile', {Req, From}}, socketio_transport_htmlfile}, From, State),
+            {noreply, State}
+    end;
 
 %% Incoming htmlfile data
 handle_call({request, 'POST', ["send", SessionId, "htmlfile"|Resource], Req }, _From, 
@@ -304,3 +328,11 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 listener(#state{ sup = Sup }) ->
     socketio_listener:server(Sup).
+
+authorize_session_request(Req, #state{ server_module = ServerModule } = State) ->
+    case socketio_listener:verify_origin_headers(
+             ServerModule:get_headers(Req),
+             socketio_listener:origins(listener(State))) of
+        false -> false;
+        _ -> true
+    end.

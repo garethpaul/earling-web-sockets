@@ -1,6 +1,7 @@
 # earling-web-sockets
 
 WebSocket upgrades authorize Origin headers before creating sessions.
+New HTTP transport requests authorize Origin headers before creating sessions.
 
 <!-- README-OVERVIEW-IMAGE -->
 ![Project overview](docs/readme-overview.svg)

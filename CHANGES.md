@@ -2,6 +2,7 @@
 
 ## 2026-06-14
 
+- New HTTP transport requests authorize Origin headers before creating sessions.
 - WebSocket upgrades authorize Origin headers before creating sessions.
 - Reject disallowed HTMLFile POST origins before parsing form data or decoding
   Socket.IO frames.
