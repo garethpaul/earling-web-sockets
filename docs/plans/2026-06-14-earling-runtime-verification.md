@@ -1,13 +1,13 @@
 ---
 title: Earling Legacy Runtime Verification Matrix
 type: reliability
-status: in_progress
+status: completed
 date: 2026-06-14
 ---
 
 # Earling Legacy Runtime Verification Matrix
 
-## Status: In Progress
+## Status: Completed
 
 ## Problem Frame
 
@@ -53,3 +53,27 @@ demo servers remain unexecuted.
 - Python static checker compilation and execution
 - Isolated hostile documentation mutations
 - Exact diff, generated-artifact, certificate/key, and secret-pattern audits
+
+## Work Completed
+
+- Added a 14-scenario exact-head runtime matrix covering OTP/rebar setup,
+  dependency identity, compile, EUnit, WebSocket and fallback transports,
+  origin allow/deny paths, timers, malformed frames, and HTTP/SSL demos.
+- Required isolated synthetic origins, payloads, and clients, sanitized
+  evidence, exact commit and pull-request attribution, and explicit `pass`,
+  `fail`, `blocked`, or `not run` statuses.
+- Kept portable static checks, compile/EUnit, transport clients, browser
+  evidence, and demo-server evidence separate.
+- Added mutation-sensitive contracts without changing Erlang source, tests,
+  dependencies, submodules, demos, certificates, keys, or runtime behavior.
+
+## Verification Completed
+
+- `sh -n scripts/check-baseline.sh` passed.
+- `make check` and the direct static gate passed from the repository and an
+  external working directory.
+- All Python authorization-order checkers compiled and passed.
+- Twelve isolated hostile documentation mutations were rejected.
+- `erl` and `escript` were unavailable, so no Erlang compile, EUnit, transport
+  client, HTTP demo, SSL demo, or browser scenario was executed; all 14 runtime
+  scenarios remain truthfully marked `not run`.

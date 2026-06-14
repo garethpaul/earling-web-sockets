@@ -42,6 +42,10 @@ Helpful reports include:
 - The static baseline permits exactly one submodule: `priv/Socket.IO` at the
   canonical LearnBoost HTTPS URL and legacy `06` branch. URL, path, branch,
   section, and option drift are rejected.
+- Runtime compatibility, transport, and demo-server claims require the
+  exact-head runtime verification matrix. The tracked demo certificate and
+  private key are test-only fixtures and cannot establish production TLS
+  suitability.
 
 ## Service and API Notes
 

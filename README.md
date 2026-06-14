@@ -169,6 +169,9 @@ When the required SDK or runtime is unavailable, use static checks and source re
   multipart POST authorization ordering.
 - See `docs/plans/2026-06-14-htmlfile-authorization-order.md` for HTMLFile POST
   authorization ordering.
+- Use [`RUNTIME_VERIFICATION.md`](RUNTIME_VERIFICATION.md) for exact-head
+  Erlang/OTP, compile, EUnit, transport-client, timer, HTTP demo, and SSL demo
+  evidence. It requires synthetic origins and payloads plus sanitized results.
 
 ## Contributing
 

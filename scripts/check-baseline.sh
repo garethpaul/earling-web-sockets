@@ -29,6 +29,8 @@ XHR_MULTIPART_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-xhr-multipart-authoriza
 HTMLFILE_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-htmlfile-authorization-order.md"
 WEBSOCKET_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-websocket-origin-authorization.md"
 HTTP_SESSION_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-http-session-origin-authorization.md"
+RUNTIME_VERIFICATION="$ROOT_DIR/RUNTIME_VERIFICATION.md"
+RUNTIME_VERIFICATION_PLAN="$ROOT_DIR/docs/plans/2026-06-14-earling-runtime-verification.md"
 POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-polling-authorization-order.py"
 XHR_MULTIPART_AUTH_CHECK="$ROOT_DIR/scripts/check-xhr-multipart-authorization-order.py"
 HTMLFILE_AUTH_CHECK="$ROOT_DIR/scripts/check-htmlfile-authorization-order.py"
@@ -46,6 +48,7 @@ DEMO="$ROOT_DIR/demo/demo.erl"
 
 for path in \
   "README.md" \
+  "RUNTIME_VERIFICATION.md" \
   "SECURITY.md" \
   "VISION.md" \
   "Makefile" \
@@ -83,12 +86,85 @@ for path in \
   "docs/plans/2026-06-14-websocket-origin-authorization.md" \
   "scripts/check-websocket-origin-authorization.py" \
   "docs/plans/2026-06-14-http-session-origin-authorization.md" \
+  "docs/plans/2026-06-14-earling-runtime-verification.md" \
   "scripts/check-http-session-origin-authorization.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
   if [ ! -f "$ROOT_DIR/$path" ]; then
     printf '%s\n' "Required file missing: $path" >&2
+    exit 1
+  fi
+done
+
+for runtime_contract in \
+  "Commit: pending implementation commit" \
+  "Pull request: pending" \
+  "Evidence status: not run" \
+  "isolated legacy-compatible Erlang/OTP environment" \
+  "Required sanitized evidence" \
+  "Use only \`pass\`, \`fail\`, \`blocked\`, or \`not run\`" \
+  "A Python checker, shell contract, or source review cannot mark a runtime" \
+  "No Erlang compile, EUnit, transport client, HTTP demo, SSL demo, or browser"; do
+  if ! grep -Fq "$runtime_contract" "$RUNTIME_VERIFICATION"; then
+    printf '%s\n' "Runtime verification matrix contract is missing: $runtime_contract" >&2
+    exit 1
+  fi
+done
+
+if [ "$(grep -Ec '^\| [0-9]+ \|' "$RUNTIME_VERIFICATION")" -ne 14 ] ||
+  [ "$(grep -Ec '^\| [0-9]+ \|.*\| not run \|$' "$RUNTIME_VERIFICATION")" -ne 14 ]; then
+  printf '%s\n' "Runtime verification matrix must retain 14 explicitly not-run scenarios." >&2
+  exit 1
+fi
+
+for runtime_scenario in \
+  "Erlang and rebar environment" \
+  "Socket.IO dependency identity" \
+  "Legacy project compile" \
+  "EUnit suite" \
+  "WebSocket allowed origin" \
+  "WebSocket denied origin" \
+  "XHR polling transport" \
+  "JSONP polling transport" \
+  "XHR multipart transport" \
+  "HTMLFile transport" \
+  "Heartbeat and timeout timers" \
+  "Malformed and oversized frames" \
+  "HTTP demo lifecycle" \
+  "SSL demo fixture boundary"; do
+  if [ "$(grep -Fc "| $runtime_scenario |" "$RUNTIME_VERIFICATION")" -ne 1 ]; then
+    printf '%s\n' "Runtime verification scenario is missing or duplicated: $runtime_scenario" >&2
+    exit 1
+  fi
+done
+
+for runtime_guidance in \
+  "RUNTIME_VERIFICATION.md" \
+  "synthetic origins and payloads" \
+  "sanitized results"; do
+  if ! grep -Fq "$runtime_guidance" "$README"; then
+    printf '%s\n' "README runtime verification guidance is missing: $runtime_guidance" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq "Keep exact-head Erlang/OTP, transport-client, and demo-server evidence" "$VISION" ||
+  ! grep -Fq "Runtime compatibility, transport, and demo-server claims require" "$SECURITY" ||
+  ! grep -Fq "Added an exact-head Earling legacy runtime verification matrix" "$ROOT_DIR/CHANGES.md"; then
+  printf '%s\n' "Project guidance must retain the Earling runtime evidence boundary." >&2
+  exit 1
+fi
+
+for runtime_plan_contract in \
+  "status: completed" \
+  "## Status: Completed" \
+  "## Work Completed" \
+  "## Verification Completed" \
+  "Twelve isolated hostile documentation mutations were rejected" \
+  "all 14 runtime"; do
+  if ! grep -Fq "$runtime_plan_contract" "$RUNTIME_VERIFICATION_PLAN"; then
+    printf '%s\n' "Runtime verification plan must record completed evidence: $runtime_plan_contract" >&2
     exit 1
   fi
 done

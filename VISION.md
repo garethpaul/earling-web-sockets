@@ -58,6 +58,8 @@ Current baseline:
   material.
 - Long-polling transports ignore stale heartbeat and polling timer references
   after timers are reset.
+- Keep exact-head Erlang/OTP, transport-client, and demo-server evidence
+  sanitized and separate from portable static verification.
 - Polling JSONP callback indexes are restricted to bounded non-empty digit
   strings before JavaScript response construction.
 - GitHub Actions runs the static maintenance `make check` baseline with pinned,

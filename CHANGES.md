@@ -2,6 +2,9 @@
 
 ## 2026-06-14
 
+- Added an exact-head Earling legacy runtime verification matrix that separates
+  static checks from sanitized compile, EUnit, transport-client, timer, HTTP,
+  and SSL demo evidence.
 - New HTTP transport requests authorize Origin headers before creating sessions.
 - WebSocket upgrades authorize Origin headers before creating sessions.
 - Reject disallowed HTMLFile POST origins before parsing form data or decoding
