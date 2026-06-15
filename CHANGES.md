@@ -2,6 +2,7 @@
 
 ## 2026-06-15
 
+- Session data POST requests authorize Origin headers before session lookup or transport dispatch.
 - Matched Origin header names case-insensitively across legacy parser representations.
 - Returning polling GET requests authorize Origin headers before session lookup or transport dispatch.
 

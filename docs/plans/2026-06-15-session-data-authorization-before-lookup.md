@@ -1,7 +1,7 @@
 ---
 title: Session Data Authorization Before Lookup
 type: security
-status: in_progress
+status: completed
 date: 2026-06-15
 execution: code
 ---
@@ -106,4 +106,34 @@ Files:
   session-existence oracle.
 - Portable static checks do not prove live Misultin or transport behavior.
 
-## Status: In Progress
+## Work Completed
+
+- Routed all four session-data POST handlers through a shared helper without
+  changing their transport atoms, reply tuples, or authorized request payloads.
+- Authorized the request before the first session-table lookup and returned the
+  existing `405 unauthorized` response without dispatch when authorization
+  fails.
+- Added a portable static contract for route coverage, transport mapping,
+  authorization order, denial behavior, session lookup, dispatch, and missing
+  session behavior.
+- Added the checker, plan evidence, and security guidance to the repository
+  baseline gate.
+
+## Verification Completed
+
+- `sh -n scripts/check-baseline.sh` passed.
+- The focused session-data, returning-polling, and new-session Origin checkers
+  passed.
+- `EARLING_STATIC_ONLY=1 make check` passed from the repository root and from
+  an external working directory.
+- Six isolated hostile mutations were rejected: route mapping drift,
+  authorization bypass, denial status drift, dispatch-shape drift,
+  documentation removal, and incomplete completion evidence.
+- Exact diff, generated artifact, conflict marker, changed-line secret, and
+  tracked demo credential boundary audits passed.
+- Erlang EUnit was unavailable locally because `erl` and `escript` are not
+  installed. No live listener, transport client, HTTP demo, or SSL demo was
+  run; those runtime claims remain explicitly unverified in
+  `RUNTIME_VERIFICATION.md`.
+
+## Status: Completed

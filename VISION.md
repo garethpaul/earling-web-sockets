@@ -3,6 +3,7 @@
 WebSocket upgrades authorize Origin headers before creating sessions.
 New HTTP transport requests authorize Origin headers before creating sessions.
 Returning polling GET requests authorize Origin headers before session lookup or transport dispatch.
+Session data POST requests authorize Origin headers before session lookup or transport dispatch.
 
 This document explains the current state and direction of the project.
 Project overview and developer docs: [`README.md`](README.md)

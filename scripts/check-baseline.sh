@@ -31,6 +31,7 @@ HTMLFILE_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-htmlfile-authorization-order
 WEBSOCKET_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-websocket-origin-authorization.md"
 HTTP_SESSION_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-http-session-origin-authorization.md"
 RETURNING_POLLING_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-15-returning-polling-origin-authorization.md"
+SESSION_DATA_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-15-session-data-authorization-before-lookup.md"
 RUNTIME_VERIFICATION="$ROOT_DIR/RUNTIME_VERIFICATION.md"
 RUNTIME_VERIFICATION_PLAN="$ROOT_DIR/docs/plans/2026-06-14-earling-runtime-verification.md"
 POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-polling-authorization-order.py"
@@ -39,6 +40,7 @@ HTMLFILE_AUTH_CHECK="$ROOT_DIR/scripts/check-htmlfile-authorization-order.py"
 WEBSOCKET_AUTH_CHECK="$ROOT_DIR/scripts/check-websocket-origin-authorization.py"
 HTTP_SESSION_AUTH_CHECK="$ROOT_DIR/scripts/check-http-session-origin-authorization.py"
 RETURNING_POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-returning-polling-authorization.py"
+SESSION_DATA_AUTH_CHECK="$ROOT_DIR/scripts/check-session-data-authorization.py"
 ORIGIN_HEADER_NAME_CHECK="$ROOT_DIR/scripts/check-origin-header-name-normalization.py"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
@@ -92,9 +94,11 @@ for path in \
   "scripts/check-websocket-origin-authorization.py" \
   "docs/plans/2026-06-14-http-session-origin-authorization.md" \
   "docs/plans/2026-06-15-returning-polling-origin-authorization.md" \
+  "docs/plans/2026-06-15-session-data-authorization-before-lookup.md" \
   "docs/plans/2026-06-14-earling-runtime-verification.md" \
   "scripts/check-http-session-origin-authorization.py" \
   "scripts/check-returning-polling-authorization.py" \
+  "scripts/check-session-data-authorization.py" \
   "scripts/check-origin-header-name-normalization.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
@@ -183,6 +187,7 @@ python3 "$HTMLFILE_AUTH_CHECK" "$HTMLFILE"
 python3 "$WEBSOCKET_AUTH_CHECK" "$ROOT_DIR/src/socketio_http_misultin.erl" "$ROOT_DIR/src/socketio_http.erl"
 python3 "$HTTP_SESSION_AUTH_CHECK" "$HTTP"
 python3 "$RETURNING_POLLING_AUTH_CHECK" "$HTTP"
+python3 "$SESSION_DATA_AUTH_CHECK" "$HTTP"
 python3 "$ORIGIN_HEADER_NAME_CHECK"
 
 for websocket_auth_doc in AGENTS.md README.md SECURITY.md VISION.md CHANGES.md; do
@@ -191,6 +196,7 @@ done
 for http_session_auth_doc in AGENTS.md README.md SECURITY.md VISION.md CHANGES.md; do
   grep -Fq "New HTTP transport requests authorize Origin headers before creating sessions." "$ROOT_DIR/$http_session_auth_doc" || exit 1
   grep -Fq "Returning polling GET requests authorize Origin headers before session lookup or transport dispatch." "$ROOT_DIR/$http_session_auth_doc" || exit 1
+  grep -Fq "Session data POST requests authorize Origin headers before session lookup or transport dispatch." "$ROOT_DIR/$http_session_auth_doc" || exit 1
 done
 for http_session_plan_contract in \
   "Status: Completed" \
@@ -207,6 +213,14 @@ for returning_polling_plan_contract in \
   "Ten isolated hostile mutations were rejected" \
   "Erlang EUnit was unavailable locally"; do
   grep -Fq "$returning_polling_plan_contract" "$RETURNING_POLLING_AUTH_PLAN" || exit 1
+done
+for session_data_plan_contract in \
+  "status: completed" \
+  "## Status: Completed" \
+  "## Work Completed" \
+  "## Verification Completed" \
+  "hostile mutations were rejected"; do
+  grep -Fq "$session_data_plan_contract" "$SESSION_DATA_AUTH_PLAN" || exit 1
 done
 for contract in "Status: Completed" "make check" "hostile mutations"; do
   grep -Fq "$contract" "$WEBSOCKET_AUTH_PLAN" || exit 1
