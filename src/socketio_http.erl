@@ -107,13 +107,18 @@ handle_call({request, 'GET', [_Random, "xhr-polling"|Resource], Req }, From,
 handle_call({request, 'GET', [_Random, SessionId, "xhr-polling"|Resource], Req }, From, 
             #state{ server_module = ServerModule,
                     resource = Resource, sessions = Sessions } = State) ->
-    case ets:lookup(Sessions, SessionId) of
-        [{SessionId, Pid}] -> 
-            gen_server:cast(Pid, {'xhr-polling', polling_request, Req, From});
-        _ ->
-            gen_server:reply(From, apply(ServerModule, respond, [Req, 404, ""]))
-    end,
-    {noreply, State};
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        true ->
+            case ets:lookup(Sessions, SessionId) of
+                [{SessionId, Pid}] ->
+                    gen_server:cast(Pid, {'xhr-polling', polling_request, Req, From});
+                _ ->
+                    gen_server:reply(From, apply(ServerModule, respond, [Req, 404, ""]))
+            end,
+            {noreply, State}
+    end;
 
 %% Incoming XHR Polling data
 handle_call({request, 'POST', ["send", SessionId, "xhr-polling"|Resource], Req }, _From, #state{ resource = Resource, 
@@ -143,13 +148,18 @@ handle_call({request, 'GET', [Index, _Random, SessionId, "jsonp-polling"|Resourc
             #state{ resource = Resource, 
                     server_module = ServerModule,
                     sessions = Sessions } = State) ->
-    case ets:lookup(Sessions, SessionId) of
-        [{SessionId, Pid}] ->
-            gen_server:cast(Pid, {'jsonp-polling', polling_request, {Req, Index}, From});
-        _ ->
-            gen_server:reply(From, apply(ServerModule, respond, [Req, 404, ""]))
-    end,
-    {noreply, State};
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        true ->
+            case ets:lookup(Sessions, SessionId) of
+                [{SessionId, Pid}] ->
+                    gen_server:cast(Pid, {'jsonp-polling', polling_request, {Req, Index}, From});
+                _ ->
+                    gen_server:reply(From, apply(ServerModule, respond, [Req, 404, ""]))
+            end,
+            {noreply, State}
+    end;
 
 %% Incoming JSONP Polling data
 handle_call({request, 'POST', [_Index, _Random, SessionId, "jsonp-polling"|Resource], Req }, _From, 

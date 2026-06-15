@@ -3,6 +3,7 @@
 ## 2026-06-15
 
 - Matched Origin header names case-insensitively across legacy parser representations.
+- Returning polling GET requests authorize Origin headers before session lookup or transport dispatch.
 
 ## 2026-06-14
 

@@ -1,6 +1,6 @@
 # Returning Polling Origin Authorization
 
-Status: In Progress
+Status: Completed
 
 ## Problem
 
@@ -44,3 +44,26 @@ long-poll connection while no response payload is available.
   documentation, completed status, and recorded verification.
 - Record that Erlang EUnit and runtime transport execution remain unavailable
   when `erl` and `escript` are not installed.
+
+## Work Completed
+
+- Guarded both returning XHR and JSONP polling GET routes with the shared
+  request Origin authorizer before session lookup and transport dispatch.
+- Preserved authorized unknown-session 404 responses and the established 405
+  response for explicit Origin denial.
+- Added a dependency-free route-order checker and synchronized contributor,
+  security, project, vision, and change guidance.
+
+## Verification Completed
+
+- Root and external-directory `EARLING_STATIC_ONLY=1 make check` passed all
+  static maintenance, authorization-order, submodule, and PEM boundaries.
+- The new checker passed and every Python checker compiled successfully;
+  `sh -n scripts/check-baseline.sh` and `git diff --check` also passed.
+- Ten isolated hostile mutations were rejected for the XHR guard, denial
+  branch, status, lookup, and dispatch; the JSONP guard and dispatch;
+  authorized unknown-session 404 behavior; documentation drift; and reopened
+  plan status.
+- Erlang EUnit was unavailable locally because `erl` and `escript` are not
+  installed. No compile, transport-client, browser, HTTP/SSL demo, or runtime
+  result is claimed.
