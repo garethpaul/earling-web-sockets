@@ -65,6 +65,8 @@ repository and the legacy Socket.IO `06` client branch required by the demos.
   to 80 for HTTP and 443 for HTTPS, and DNS hostnames compare
   case-insensitively. Ambiguous duplicate or comma-joined Origin headers fail closed
   before CORS response headers are emitted; empty and non-list values also fail.
+  Origin field names are matched case-insensitively across legacy atom, string,
+  and binary representations, and duplicates across representations fail closed.
   Polling, XHR multipart, and HTMLFile POST bodies are parsed and decoded only after this
   authorization succeeds.
 - Malformed Socket.IO frames decode to an empty message list instead of

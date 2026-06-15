@@ -1,6 +1,6 @@
 # Normalize Origin Header Names
 
-status: planned
+status: completed
 
 ## Problem
 
@@ -43,4 +43,16 @@ authorization bypass when a present header is represented differently.
 
 ## Verification
 
-Pending implementation and bounded validation.
+- `EARLING_STATIC_ONLY=1 make check` passed from the repository root and from an
+  external working directory, including the new source/EUnit contract checker
+  and all existing authorization-order, maintenance, submodule, and PEM audits.
+- Every Python checker compiled successfully.
+- Eight hostile mutations were rejected for removed atom, list, or binary
+  handling, restored exact-atom lookup, missing lowercase or cross-
+  representation duplicate regressions, documentation drift, and reopened plan
+  status.
+- Manual review added containment and regression coverage for malformed list-
+  valued header names so unknown input cannot crash normalization.
+- EUnit was not executed because Erlang and `escript` are unavailable; no
+  compile, transport-client, browser, HTTP/SSL demo, or runtime result is
+  claimed.

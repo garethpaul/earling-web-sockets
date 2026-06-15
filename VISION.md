@@ -44,6 +44,7 @@ Current baseline:
   hostname boundaries and explicit wildcard behavior.
 - Duplicate, empty, non-list, and comma-joined Origin headers fail closed before
   polling or XHR-multipart transports emit CORS response headers.
+- Match Origin field names case-insensitively across parser representations.
 - Polling POST bodies are parsed and decoded only after Origin authorization.
 - XHR multipart POST bodies reject disallowed origins before parsing or decode.
 - HTMLFile POST bodies reject disallowed origins before parsing or decode.

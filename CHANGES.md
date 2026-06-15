@@ -1,5 +1,9 @@
 # Changes
 
+## 2026-06-15
+
+- Matched Origin header names case-insensitively across legacy parser representations.
+
 ## 2026-06-14
 
 - Added an exact-head Earling legacy runtime verification matrix that separates

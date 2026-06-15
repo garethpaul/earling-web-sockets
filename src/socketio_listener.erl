@@ -64,7 +64,7 @@ origins(Server, Origins) ->
     gen_server:call(Server, {origins, Origins}).
 
 verify_origin_headers(Headers, Origins) ->
-    case proplists:get_all_values('Origin', Headers) of
+    case origin_header_values(Headers) of
         [] ->
             undefined;
         [Origin] when is_list(Origin), Origin =/= [] ->
@@ -75,6 +75,21 @@ verify_origin_headers(Headers, Origins) ->
         _ ->
             false
     end.
+
+origin_header_values(Headers) ->
+    [Value || {Name, Value} <- Headers, origin_header_name(Name)].
+
+origin_header_name(Name) when is_atom(Name) ->
+    string:to_lower(atom_to_list(Name)) =:= "origin";
+origin_header_name(Name) when is_list(Name) ->
+    case catch string:to_lower(Name) of
+        "origin" -> true;
+        _ -> false
+    end;
+origin_header_name(Name) when is_binary(Name) ->
+    origin_header_name(binary_to_list(Name));
+origin_header_name(_) ->
+    false.
 
 verify_origin(Origin, Origins) ->
     case catch ex_uri:decode(Origin) of

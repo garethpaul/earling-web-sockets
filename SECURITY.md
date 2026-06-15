@@ -60,6 +60,8 @@ ports normalize to 80 for HTTP and 443 for HTTPS before matching. Parsed and
 configured DNS hostnames compare case-insensitively, without treating suffixes
 or near-miss names as equal. Duplicate, empty, non-list, and comma-joined
 Origin headers fail closed before a transport emits CORS response headers.
+Origin field names must be matched case-insensitively across atom, string, and
+binary representations without converting request data into atoms.
 Polling POST bodies are not parsed or decoded until that Origin authorization
 succeeds.
 XHR multipart POST bodies follow the same fail-closed ordering and return the

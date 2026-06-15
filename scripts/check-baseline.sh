@@ -22,6 +22,7 @@ CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
 ORIGIN_PLAN="$ROOT_DIR/docs/plans/2026-06-10-web-origin-boundary.md"
 ORIGIN_CASE_PLAN="$ROOT_DIR/docs/plans/2026-06-12-origin-host-case-normalization.md"
 ORIGIN_HEADER_PLAN="$ROOT_DIR/docs/plans/2026-06-13-origin-header-cardinality.md"
+ORIGIN_HEADER_NAME_PLAN="$ROOT_DIR/docs/plans/2026-06-15-001-origin-header-name-normalization.md"
 SUBMODULE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-socketio-submodule-identity.md"
 POLLING_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-13-polling-authorization-order.md"
 LOCATION_MAKE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-location-independent-make.md"
@@ -36,6 +37,7 @@ XHR_MULTIPART_AUTH_CHECK="$ROOT_DIR/scripts/check-xhr-multipart-authorization-or
 HTMLFILE_AUTH_CHECK="$ROOT_DIR/scripts/check-htmlfile-authorization-order.py"
 WEBSOCKET_AUTH_CHECK="$ROOT_DIR/scripts/check-websocket-origin-authorization.py"
 HTTP_SESSION_AUTH_CHECK="$ROOT_DIR/scripts/check-http-session-origin-authorization.py"
+ORIGIN_HEADER_NAME_CHECK="$ROOT_DIR/scripts/check-origin-header-name-normalization.py"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -75,6 +77,7 @@ for path in \
   "docs/plans/2026-06-10-web-origin-boundary.md" \
   "docs/plans/2026-06-12-origin-host-case-normalization.md" \
   "docs/plans/2026-06-13-origin-header-cardinality.md" \
+  "docs/plans/2026-06-15-001-origin-header-name-normalization.md" \
   "docs/plans/2026-06-13-socketio-submodule-identity.md" \
   "docs/plans/2026-06-13-polling-authorization-order.md" \
   "docs/plans/2026-06-13-location-independent-make.md" \
@@ -88,6 +91,7 @@ for path in \
   "docs/plans/2026-06-14-http-session-origin-authorization.md" \
   "docs/plans/2026-06-14-earling-runtime-verification.md" \
   "scripts/check-http-session-origin-authorization.py" \
+  "scripts/check-origin-header-name-normalization.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -174,6 +178,7 @@ python3 "$XHR_MULTIPART_AUTH_CHECK" "$XHR_MULTIPART"
 python3 "$HTMLFILE_AUTH_CHECK" "$HTMLFILE"
 python3 "$WEBSOCKET_AUTH_CHECK" "$ROOT_DIR/src/socketio_http_misultin.erl" "$ROOT_DIR/src/socketio_http.erl"
 python3 "$HTTP_SESSION_AUTH_CHECK" "$HTTP"
+python3 "$ORIGIN_HEADER_NAME_CHECK"
 
 for websocket_auth_doc in AGENTS.md README.md SECURITY.md VISION.md CHANGES.md; do
   grep -Fq "WebSocket upgrades authorize Origin headers before creating sessions." "$ROOT_DIR/$websocket_auth_doc" || exit 1
@@ -365,7 +370,7 @@ fi
 
 for origin_header_contract in \
   "verify_origin_headers(Headers, Origins)" \
-  "proplists:get_all_values('Origin', Headers)" \
+  "origin_header_values(Headers)" \
   'lists:member($,, Origin)' \
   "missing_origin_header_is_absent_test" \
   "single_origin_header_is_verified_test" \
@@ -379,10 +384,32 @@ for origin_header_contract in \
   fi
 done
 
+if grep -Fq "proplists:get_all_values('Origin', Headers)" "$LISTENER"; then
+  printf '%s\n' "Origin header verification must not use exact-atom-only lookup." >&2
+  exit 1
+fi
+
 if [ "$(grep -Fc 'socketio_listener:verify_origin_headers' "$POLLING")" -ne 1 ] ||
   [ "$(grep -Fc 'socketio_listener:verify_origin_headers' "$XHR_MULTIPART")" -ne 2 ] ||
   grep -Fq "proplists:get_value('Origin', Headers)" "$POLLING" "$XHR_MULTIPART"; then
   printf '%s\n' "CORS transports must use the shared Origin header verifier at each guarded request boundary." >&2
+  exit 1
+fi
+
+if ! grep -Fq 'status: completed' "$ORIGIN_HEADER_NAME_PLAN" || \
+  ! grep -Fq 'EARLING_STATIC_ONLY=1 make check' "$ORIGIN_HEADER_NAME_PLAN" || \
+  ! grep -Fq 'hostile mutations' "$ORIGIN_HEADER_NAME_PLAN" || \
+  ! grep -Fq 'EUnit was not executed' "$ORIGIN_HEADER_NAME_PLAN"; then
+  printf '%s\n' "Origin header-name normalization plan must record truthful completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq 'Origin field names are matched case-insensitively' "$README" || \
+  ! grep -Fq 'Origin field names must be matched case-insensitively' "$SECURITY" || \
+  ! grep -Fq 'Match Origin field names case-insensitively' "$VISION" || \
+  ! grep -Fq 'Origin header names must be matched case-insensitively' "$ROOT_DIR/AGENTS.md" || \
+  ! grep -Fq 'Matched Origin header names case-insensitively' "$ROOT_DIR/CHANGES.md"; then
+  printf '%s\n' "Project guidance must document case-insensitive Origin field names." >&2
   exit 1
 fi
 
