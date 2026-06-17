@@ -22,5 +22,8 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Verify OpenSSL availability
+        run: openssl version
+
       - name: Run static maintenance baseline
         run: EARLING_STATIC_ONLY=1 make check

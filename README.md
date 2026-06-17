@@ -61,6 +61,10 @@ repository and the legacy Socket.IO `06` client branch required by the demos.
   branch at its canonical HTTPS repository and path for protocol compatibility.
 - Demo certificates under `demo/test_certificate.pem` and
   `demo/test_privkey.pem` are test-only material for local SSL demos.
+- TLS fixture integrity is verified with OpenSSL: the reviewed expired
+  certificate fingerprint, encrypted key marker, demo password, and matching
+  certificate/key public keys must remain intact. This does not make the
+  fixture suitable for production TLS.
 - Origin values must be complete `http` or `https` origins without userinfo,
   paths, queries, fragments, trailing parser data, or invalid ports before
   transport handlers apply the configured allow-list. Omitted ports normalize

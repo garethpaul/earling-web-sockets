@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-17
+
+- Added OpenSSL-backed integrity checks for the encrypted demo TLS fixture pair,
+  including reviewed identity, expiry, password, and public-key matching.
+
 ## 2026-06-15
 
 - Session data POST requests authorize Origin headers before session lookup or transport dispatch.

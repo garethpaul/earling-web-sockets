@@ -32,6 +32,7 @@ WEBSOCKET_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-websocket-origin-authorizat
 HTTP_SESSION_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-http-session-origin-authorization.md"
 RETURNING_POLLING_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-15-returning-polling-origin-authorization.md"
 SESSION_DATA_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-15-session-data-authorization-before-lookup.md"
+TLS_FIXTURE_PLAN="$ROOT_DIR/docs/plans/2026-06-17-demo-tls-fixture-integrity.md"
 RUNTIME_VERIFICATION="$ROOT_DIR/RUNTIME_VERIFICATION.md"
 RUNTIME_VERIFICATION_PLAN="$ROOT_DIR/docs/plans/2026-06-14-earling-runtime-verification.md"
 POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-polling-authorization-order.py"
@@ -41,6 +42,8 @@ WEBSOCKET_AUTH_CHECK="$ROOT_DIR/scripts/check-websocket-origin-authorization.py"
 HTTP_SESSION_AUTH_CHECK="$ROOT_DIR/scripts/check-http-session-origin-authorization.py"
 RETURNING_POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-returning-polling-authorization.py"
 SESSION_DATA_AUTH_CHECK="$ROOT_DIR/scripts/check-session-data-authorization.py"
+TLS_FIXTURE_CHECK="$ROOT_DIR/scripts/check-demo-tls-fixture.sh"
+TLS_FIXTURE_TEST="$ROOT_DIR/tests/check-demo-tls-fixture.sh"
 ORIGIN_HEADER_NAME_CHECK="$ROOT_DIR/scripts/check-origin-header-name-normalization.py"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
@@ -95,10 +98,13 @@ for path in \
   "docs/plans/2026-06-14-http-session-origin-authorization.md" \
   "docs/plans/2026-06-15-returning-polling-origin-authorization.md" \
   "docs/plans/2026-06-15-session-data-authorization-before-lookup.md" \
+  "docs/plans/2026-06-17-demo-tls-fixture-integrity.md" \
   "docs/plans/2026-06-14-earling-runtime-verification.md" \
   "scripts/check-http-session-origin-authorization.py" \
   "scripts/check-returning-polling-authorization.py" \
   "scripts/check-session-data-authorization.py" \
+  "scripts/check-demo-tls-fixture.sh" \
+  "tests/check-demo-tls-fixture.sh" \
   "scripts/check-origin-header-name-normalization.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
@@ -282,6 +288,73 @@ if ! grep -Fq "demo/test_privkey.pem" "$README" ||
   exit 1
 fi
 
+if [ ! -x "$TLS_FIXTURE_CHECK" ] || [ ! -x "$TLS_FIXTURE_TEST" ]; then
+  printf '%s\n' "Demo TLS fixture checker and regression suite must remain executable." >&2
+  exit 1
+fi
+
+for tls_contract in \
+  "EXPECTED_FINGERPRINT='88:32:97:52:0C:98:78:34:A5:D0:AF:BE:91:4A:03:30:90:A2:DD:FB:89:B7:DD:DE:80:4A:65:41:25:E9:49:8D'" \
+  "EXPECTED_NOT_AFTER='notAfter=Apr 17 17:47:38 2020 GMT'" \
+  "Proc-Type: 4,ENCRYPTED" \
+  'FIXTURE_PASSWORD=misultin' \
+  'cmp -s "$TMP_ROOT/certificate-public.der" "$TMP_ROOT/key-public.der"' \
+  "certificate and private key do not match"; do
+  if ! grep -Fq "$tls_contract" "$TLS_FIXTURE_CHECK"; then
+    printf '%s\n' "Demo TLS fixture checker contract is missing: $tls_contract" >&2
+    exit 1
+  fi
+done
+
+for tls_test_contract in \
+  "certificate-replacement" \
+  "key-replacement" \
+  "password-drift" \
+  "encryption-marker-removal" \
+  "wrong-key-password" \
+  "scanner output exposed"; do
+  if ! grep -Fq "$tls_test_contract" "$TLS_FIXTURE_TEST"; then
+    printf '%s\n' "Demo TLS fixture regression contract is missing: $tls_test_contract" >&2
+    exit 1
+  fi
+done
+
+"$TLS_FIXTURE_CHECK"
+"$TLS_FIXTURE_TEST"
+
+if ! grep -Fq 'TLS fixture integrity is verified with OpenSSL' "$README" || \
+  ! grep -Fq 'OpenSSL verifies the reviewed demo certificate fingerprint' "$SECURITY" || \
+  ! grep -Fq 'Verify the encrypted demo TLS fixture identity with OpenSSL' "$VISION" || \
+  ! grep -Fq 'demo TLS fixtures must retain the reviewed fingerprint' "$ROOT_DIR/AGENTS.md" || \
+  ! grep -Fq 'Added OpenSSL-backed integrity checks for the encrypted demo TLS fixture pair' "$ROOT_DIR/CHANGES.md"; then
+  printf '%s\n' "Project guidance must document executable demo TLS fixture integrity." >&2
+  exit 1
+fi
+
+tls_plan_status=$(sed -n 's/^status: //p' "$TLS_FIXTURE_PLAN")
+case "$tls_plan_status" in
+  pending_hosted_verification)
+    grep -Fq 'Exact-head hosted checks remain pending.' "$TLS_FIXTURE_PLAN" || exit 1
+    ;;
+  completed)
+    grep -Fq 'Both exact-head push and pull-request checks passed.' "$TLS_FIXTURE_PLAN" || exit 1
+    ;;
+  *)
+    printf '%s\n' "Demo TLS fixture plan must be pending hosted verification or completed." >&2
+    exit 1
+    ;;
+esac
+
+for tls_plan_contract in \
+  'repository-root and external-directory `make check`' \
+  'isolated hostile mutations were rejected' \
+  'No Erlang compile, EUnit, listener, transport-client, HTTP demo, SSL demo, or browser'; do
+  if ! grep -Fq "$tls_plan_contract" "$TLS_FIXTURE_PLAN"; then
+    printf '%s\n' "Demo TLS fixture plan must retain truthful local evidence: $tls_plan_contract" >&2
+    exit 1
+  fi
+done
+
 if ! grep -Fq "command -v erl" "$MAKEFILE" ||
   ! grep -Fq "command -v escript" "$MAKEFILE" ||
   ! grep -Fq 'ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))' "$MAKEFILE" ||
@@ -312,12 +385,13 @@ fi
 
 if ! grep -Fq "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" "$CI_WORKFLOW" ||
   ! grep -Fq "run: EARLING_STATIC_ONLY=1 make check" "$CI_WORKFLOW" ||
+  [ "$(grep -Fc "run: openssl version" "$CI_WORKFLOW")" -ne 1 ] ||
   ! grep -Fq "permissions:" "$CI_WORKFLOW" ||
   ! grep -Fq "contents: read" "$CI_WORKFLOW" ||
   ! grep -Fq "workflow_dispatch:" "$CI_WORKFLOW" ||
   ! grep -Fq "cancel-in-progress: true" "$CI_WORKFLOW" ||
   ! grep -Fq "timeout-minutes: 5" "$CI_WORKFLOW"; then
-  printf '%s\n' "GitHub Actions workflow must pin checkout and run the bounded, read-only make check baseline." >&2
+  printf '%s\n' "GitHub Actions workflow must verify OpenSSL availability once, pin checkout, and run the bounded, read-only make check baseline." >&2
   exit 1
 fi
 
@@ -695,6 +769,7 @@ for workflow_contract in \
   "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" \
   "persist-credentials: false" \
   "timeout-minutes: 5" \
+  "run: openssl version" \
   "EARLING_STATIC_ONLY=1 make check"; do
   if ! grep -Fq "$workflow_contract" "$CI_WORKFLOW"; then
     printf '%s\n' "Earling CI workflow must keep contract: $workflow_contract" >&2

@@ -38,6 +38,10 @@ Helpful reports include:
   certificate/key files, and both are test-only fixtures for local SSL demos.
   Do not commit production certificates, private keys, tokens, generated
   secrets, local rebar dependency caches, or machine-local configuration.
+- OpenSSL verifies the reviewed demo certificate fingerprint, historical
+  expiry metadata, encrypted private-key shape, fixture password, and matching
+  public keys. The expired self-signed pair is not production credential or
+  trust-chain material.
 - GitHub Actions runs the static maintenance `make check` baseline on Ubuntu
   24.04 with pinned checkout, disabled credential persistence, read-only
   repository access, and a five-minute timeout.

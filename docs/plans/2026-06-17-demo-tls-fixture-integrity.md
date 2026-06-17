@@ -1,7 +1,7 @@
 ---
 title: Demo TLS Fixture Integrity
 type: security
-status: planned
+status: pending_hosted_verification
 date: 2026-06-17
 ---
 
@@ -105,4 +105,16 @@ expired, test-only material unsuitable for production deployment.
 
 ## Verification Results
 
-Pending implementation and validation.
+Implementation is complete. The OpenSSL-backed checker verified the reviewed
+certificate fingerprint and expiry metadata, encrypted private-key shape,
+fixture-password decryption, and matching certificate/key public keys. The
+focused suite passed its clean case and five replacement or drift regressions.
+
+Ten isolated hostile mutations were rejected across reviewed identity,
+expiry, password, encryption, public-key matching, focused tests, workflow
+wiring, maintained guidance, and plan status. The repository-root and
+external-directory `make check` gates passed with `EARLING_STATIC_ONLY=1`.
+
+No Erlang compile, EUnit, listener, transport-client, HTTP demo, SSL demo, or browser execution is claimed.
+
+Exact-head hosted checks remain pending.

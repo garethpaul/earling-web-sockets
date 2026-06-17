@@ -59,6 +59,8 @@ Current baseline:
 - Demo SSL fixtures are limited to `demo/test_certificate.pem` and
   `demo/test_privkey.pem`, and both are documented as test-only local demo
   material.
+- Verify the encrypted demo TLS fixture identity with OpenSSL while keeping its
+  expired certificate explicitly unsuitable for production use.
 - Long-polling transports ignore stale heartbeat and polling timer references
   after timers are reset.
 - Keep exact-head Erlang/OTP, transport-client, and demo-server evidence
