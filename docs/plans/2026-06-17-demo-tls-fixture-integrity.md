@@ -1,7 +1,7 @@
 ---
 title: Demo TLS Fixture Integrity
 type: security
-status: pending_hosted_verification
+status: completed
 date: 2026-06-17
 ---
 
@@ -117,4 +117,6 @@ external-directory `make check` gates passed with `EARLING_STATIC_ONLY=1`.
 
 No Erlang compile, EUnit, listener, transport-client, HTTP demo, SSL demo, or browser execution is claimed.
 
-Exact-head hosted checks remain pending.
+Both exact-head push and pull-request checks passed. On head
+`e6867db7d6b4b0752d921df679b5873d7629f700`, push run `27663517326` and
+pull-request run `27663518524` completed successfully.
