@@ -337,7 +337,13 @@ case "$tls_plan_status" in
     grep -Fq 'Exact-head hosted checks remain pending.' "$TLS_FIXTURE_PLAN" || exit 1
     ;;
   completed)
-    grep -Fq 'Both exact-head push and pull-request checks passed.' "$TLS_FIXTURE_PLAN" || exit 1
+    for tls_hosted_contract in \
+      'Both exact-head push and pull-request checks passed.' \
+      'e6867db7d6b4b0752d921df679b5873d7629f700' \
+      'push run `27663517326`' \
+      'pull-request run `27663518524`'; do
+      grep -Fq "$tls_hosted_contract" "$TLS_FIXTURE_PLAN" || exit 1
+    done
     ;;
   *)
     printf '%s\n' "Demo TLS fixture plan must be pending hosted verification or completed." >&2
