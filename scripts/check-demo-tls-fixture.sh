@@ -21,11 +21,19 @@ for fixture in "$CERTIFICATE" "$PRIVATE_KEY" "$DEMO_SOURCE"; do
   fi
 done
 
-fingerprint=$(openssl x509 -in "$CERTIFICATE" -noout -fingerprint -sha256 2>/dev/null) || {
+fingerprint_output=$(openssl x509 -in "$CERTIFICATE" -noout -fingerprint -sha256 2>/dev/null) || {
   printf '%s\n' "The tracked demo certificate is not valid PEM certificate data." >&2
   exit 1
 }
-if [ "$fingerprint" != "SHA256 Fingerprint=$EXPECTED_FINGERPRINT" ]; then
+case $fingerprint_output in
+  *=*) fingerprint=${fingerprint_output#*=} ;;
+  *)
+    printf '%s\n' "The tracked demo certificate fingerprint output is malformed." >&2
+    exit 1
+    ;;
+esac
+fingerprint=$(printf '%s' "$fingerprint" | tr '[:lower:]' '[:upper:]')
+if [ "$fingerprint" != "$EXPECTED_FINGERPRINT" ]; then
   printf '%s\n' "The tracked demo certificate fingerprint is not the reviewed fixture." >&2
   exit 1
 fi
