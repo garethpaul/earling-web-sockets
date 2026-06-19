@@ -112,13 +112,13 @@ handle_call({_TransportType, data, Req}, From, #state{ server_module = ServerMod
                                                        event_manager = EventManager,
                                                        polling_duration = Interval,
                                                        sup = Sup } = State) ->
-    Msgs = [socketio_data:decode(#msg{content=Data}) || {"data", Data} <- ServerModule:parse_post(Req)],
     {Response, NewState} =
     case cors_headers(ServerModule:get_headers(Req), Sup) of
         {false, _Headers} ->
             Reply = gen_server:reply(From, ServerModule:respond(Req, 405, "unauthorized")),
             {Reply, State};
         {_, Headers} ->
+            Msgs = [socketio_data:decode(#msg{content=Data}) || {"data", Data} <- ServerModule:parse_post(Req)],
             F = fun(#heartbeat{}, _Acc) ->
                     {timer, reset_duration(Interval)};
                 (M, Acc) ->
@@ -329,24 +329,21 @@ jsonp_index_digits(_) ->
     false.
 
 cors_headers(Headers, Sup) ->
-    case proplists:get_value('Origin', Headers) of
+    case socketio_listener:verify_origin_headers(Headers, socketio_listener:origins(Sup)) of
 	undefined ->
 	    {undefined, []};
-	Origin ->
-	    case socketio_listener:verify_origin(Origin, socketio_listener:origins(Sup)) of
-		true ->
-		    Headers0 = [{"Access-Control-Allow-Origin", "*"}],
-		    Headers1 =
-			case proplists:get_value('Cookie', Headers) of
-			    undefined ->
-				Headers0;
-			    _Cookie ->
-				[{"Access-Control-Allow-Credentials", "true"}|Headers0]
-			end,
-		    {true, [Headers1]};
-		false ->
-		    {false, Headers}
-	    end
+	true ->
+	    Headers0 = [{"Access-Control-Allow-Origin", "*"}],
+	    Headers1 =
+		case proplists:get_value('Cookie', Headers) of
+		    undefined ->
+			Headers0;
+		    _Cookie ->
+			[{"Access-Control-Allow-Credentials", "true"}|Headers0]
+		end,
+	    {true, [Headers1]};
+	false ->
+	    {false, Headers}
     end.
 
 reset_duration({TimerRef, Time}) ->

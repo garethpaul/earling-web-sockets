@@ -1,5 +1,54 @@
 # Changes
 
+## 2026-06-19
+
+- Bound each Socket.IO session to the canonical Origin identity that created
+  it so a different allow-listed Origin cannot reuse a known session ID.
+- Rejected non-canonical UUIDv4 session IDs before ETS lookup and validated
+  JSONP callback indexes before allocating sessions.
+- Required a single decimal transport POST Content-Length capped at 1 MiB and
+  rejected transfer encodings before legacy body parsing.
+- Replaced the nonexistent mutable `06` submodule branch claim with the exact
+  peeled Socket.IO `0.6` gitlink
+  `7a5197c1e74d1f3a050b330e41e4b6e63afb209c`.
+- Added dependency-free Erlang security EUnit tests and documented that the
+  bundled 2012 rebar archive cannot load on Erlang/OTP 29.
+- Made the OpenSSL TLS fixture mutation suite portable across BSD and GNU sed.
+
+## 2026-06-17
+
+- Added OpenSSL-backed integrity checks for the encrypted demo TLS fixture pair,
+  including reviewed identity, expiry, password, and public-key matching.
+
+## 2026-06-15
+
+- Session data POST requests authorize Origin headers before session lookup or transport dispatch.
+- Matched Origin header names case-insensitively across legacy parser representations.
+- Returning polling GET requests authorize Origin headers before session lookup or transport dispatch.
+
+## 2026-06-14
+
+- Added an exact-head Earling legacy runtime verification matrix that separates
+  static checks from sanitized compile, EUnit, transport-client, timer, HTTP,
+  and SSL demo evidence.
+- New HTTP transport requests authorize Origin headers before creating sessions.
+- WebSocket upgrades authorize Origin headers before creating sessions.
+- Reject disallowed HTMLFile POST origins before parsing form data or decoding
+  Socket.IO frames.
+- Reject disallowed XHR multipart POST origins before parsing form data or
+  decoding Socket.IO frames.
+
+## 2026-06-13
+
+- Rooted Make targets to the loaded Makefile so the checker and bundled rebar
+  resolve correctly from external working directories.
+- Reject duplicate, empty, non-list, and comma-joined Origin headers before
+  polling or XHR-multipart transports emit CORS response headers.
+- Route both CORS transport paths through one listener-owned header verifier.
+- Replaced the loose Socket.IO submodule branch check with a structured,
+  fail-closed identity contract for its section, path, HTTPS URL, and branch.
+- Reject extra submodules and unreviewed submodule options in the static gate.
+
 ## 2026-06-12
 
 - Compare parsed and configured origin DNS hostnames case-insensitively while
@@ -14,6 +63,8 @@
 - Normalized omitted origin ports to 80 for HTTP and 443 for HTTPS.
 - Added EUnit and static baseline coverage for malformed origin variants and
   secure default-port handling.
+- Pinned hosted static verification to Ubuntu 24.04, disabled checkout
+  credential persistence, and added fail-closed workflow trust-boundary checks.
 - Added a GitHub Actions check workflow that runs the existing maintenance
   `make check` baseline on pushes, pull requests, and manual dispatches.
 - Pinned checkout by commit, restricted workflow permissions to read-only,

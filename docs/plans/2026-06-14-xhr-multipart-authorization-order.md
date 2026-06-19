@@ -1,0 +1,53 @@
+---
+title: XHR Multipart POST Authorization Order
+type: security
+date: 2026-06-14
+status: completed
+execution: code
+---
+
+# XHR Multipart POST Authorization Order
+
+## Summary
+
+Authorize `xhr-multipart` POST request origins before parsing or decoding their
+bodies. A disallowed Origin must receive the existing unauthorized response
+without spending work on attacker-controlled form data or Socket.IO frames.
+
+## Requirements
+
+- R1. Evaluate the shared Origin header boundary before `parse_post/1`.
+- R2. Parse and decode multipart POST data only in the allowed or absent-Origin
+  branch, preserving the legacy non-browser client path.
+- R3. Preserve authorized message, heartbeat, timer-reset, and success behavior.
+- R4. Add a mutation-sensitive static contract that rejects early, duplicated,
+  or missing body parsing and decoding.
+- R5. Run the static gate from the repository and an external working directory;
+  run EUnit when Erlang is available and otherwise rely on hosted Erlang checks.
+
+## Non-Goals
+
+- Changing Origin allow-list or header-cardinality semantics.
+- Changing polling, htmlfile, websocket, or XHR multipart response formats.
+- Modernizing legacy rebar or Socket.IO 0.6 dependencies.
+
+## Work Completed
+
+- Added shared Origin verification before the XHR multipart POST body path.
+- Preserved allowed and absent-Origin message, heartbeat, timer, and response
+  behavior while returning the legacy `405 unauthorized` response for a
+  disallowed Origin.
+- Added a focused source-order contract and wired it into the repository gate.
+- Updated contributor, security, vision, change, and maintenance guidance.
+
+## Verification
+
+- Python 3.12.8: the focused authorization-order contract passed.
+- Five hostile source mutations were rejected: early parsing, duplicate parsing,
+  missing parsing, missing decoding, and removal of the unauthorized response.
+- `EARLING_STATIC_ONLY=1 make check` passed from the repository root and through
+  the absolute Makefile path from an external working directory.
+- Local `make test` is unavailable because neither `erl` nor `escript` is
+  installed; the hosted Erlang-capable check remains required.
+- Exact intended-path, artifact, whitespace, conflict-marker, and changed-line
+  credential-pattern audits passed before commit.

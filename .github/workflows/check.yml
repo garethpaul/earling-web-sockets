@@ -14,11 +14,24 @@ concurrency:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Check out repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Verify OpenSSL availability
+        run: openssl version
+
+      - name: Install Erlang runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes erlang-base erlang-dev erlang-eunit
+
+      - name: Run executable Erlang security tests
+        run: make security-test
 
       - name: Run static maintenance baseline
         run: EARLING_STATIC_ONLY=1 make check

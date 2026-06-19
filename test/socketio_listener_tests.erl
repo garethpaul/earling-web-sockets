@@ -6,6 +6,47 @@
 empty_origins_test() ->
     ?assertEqual(false, socketio_listener:verify_origin("http://foo.bar",[])).
 
+missing_origin_header_is_absent_test() ->
+    ?assertEqual(undefined, socketio_listener:verify_origin_headers([], [{"foo.bar",80}])).
+
+single_origin_header_is_verified_test() ->
+    Headers = [{'Origin', "http://foo.bar"}],
+    ?assertEqual(true, socketio_listener:verify_origin_headers(Headers, [{"foo.bar",80}])).
+
+lowercase_atom_origin_header_is_verified_test() ->
+    Headers = [{origin, "http://foo.bar"}],
+    ?assertEqual(true, socketio_listener:verify_origin_headers(Headers, [{"foo.bar",80}])).
+
+mixed_case_string_origin_header_is_verified_test() ->
+    Headers = [{"oRiGiN", "http://foo.bar"}],
+    ?assertEqual(true, socketio_listener:verify_origin_headers(Headers, [{"foo.bar",80}])).
+
+binary_origin_header_is_verified_test() ->
+    Headers = [{<<"ORIGIN">>, "http://foo.bar"}],
+    ?assertEqual(true, socketio_listener:verify_origin_headers(Headers, [{"foo.bar",80}])).
+
+malformed_origin_header_name_is_ignored_test() ->
+    Headers = [{[invalid], "http://foo.bar"}],
+    ?assertEqual(undefined, socketio_listener:verify_origin_headers(Headers, [{"foo.bar",80}])).
+
+cross_representation_duplicate_origin_headers_are_rejected_test() ->
+    Headers = [{'Origin', "http://foo.bar"}, {"origin", "http://foo.bar"}],
+    ?assertEqual(false, socketio_listener:verify_origin_headers(Headers, [{"foo.bar",80}])).
+
+duplicate_origin_headers_are_rejected_test() ->
+    Headers = [{'Origin', "http://foo.bar"}, {'Origin', "http://foo.bar"}],
+    ?assertEqual(false, socketio_listener:verify_origin_headers(Headers, [{"foo.bar",80}])).
+
+comma_joined_origin_header_is_rejected_test() ->
+    Headers = [{'Origin', "http://foo.bar,http://example.com"}],
+    ?assertEqual(false, socketio_listener:verify_origin_headers(Headers, [{"*","*"}])).
+
+empty_origin_header_is_rejected_test() ->
+    ?assertEqual(false, socketio_listener:verify_origin_headers([{'Origin', ""}], [{"*","*"}])).
+
+non_list_origin_header_is_rejected_test() ->
+    ?assertEqual(false, socketio_listener:verify_origin_headers([{'Origin', invalid}], [{"*","*"}])).
+
 all_allowed_origins_test() ->
     ?assertEqual(true, socketio_listener:verify_origin("http://foo.bar",[{"a",80},{"*","*"}])).
 

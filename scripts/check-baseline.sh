@@ -21,6 +21,31 @@ CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
 CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
 ORIGIN_PLAN="$ROOT_DIR/docs/plans/2026-06-10-web-origin-boundary.md"
 ORIGIN_CASE_PLAN="$ROOT_DIR/docs/plans/2026-06-12-origin-host-case-normalization.md"
+ORIGIN_HEADER_PLAN="$ROOT_DIR/docs/plans/2026-06-13-origin-header-cardinality.md"
+ORIGIN_HEADER_NAME_PLAN="$ROOT_DIR/docs/plans/2026-06-15-001-origin-header-name-normalization.md"
+SUBMODULE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-socketio-submodule-identity.md"
+POLLING_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-13-polling-authorization-order.md"
+LOCATION_MAKE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-location-independent-make.md"
+XHR_MULTIPART_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-xhr-multipart-authorization-order.md"
+HTMLFILE_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-htmlfile-authorization-order.md"
+WEBSOCKET_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-websocket-origin-authorization.md"
+HTTP_SESSION_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-http-session-origin-authorization.md"
+RETURNING_POLLING_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-15-returning-polling-origin-authorization.md"
+SESSION_DATA_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-15-session-data-authorization-before-lookup.md"
+TLS_FIXTURE_PLAN="$ROOT_DIR/docs/plans/2026-06-17-demo-tls-fixture-integrity.md"
+SESSION_RESOURCE_PLAN="$ROOT_DIR/docs/plans/2026-06-19-session-ownership-and-resource-bounds.md"
+RUNTIME_VERIFICATION="$ROOT_DIR/RUNTIME_VERIFICATION.md"
+RUNTIME_VERIFICATION_PLAN="$ROOT_DIR/docs/plans/2026-06-14-earling-runtime-verification.md"
+POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-polling-authorization-order.py"
+XHR_MULTIPART_AUTH_CHECK="$ROOT_DIR/scripts/check-xhr-multipart-authorization-order.py"
+HTMLFILE_AUTH_CHECK="$ROOT_DIR/scripts/check-htmlfile-authorization-order.py"
+WEBSOCKET_AUTH_CHECK="$ROOT_DIR/scripts/check-websocket-origin-authorization.py"
+HTTP_SESSION_AUTH_CHECK="$ROOT_DIR/scripts/check-http-session-origin-authorization.py"
+RETURNING_POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-returning-polling-authorization.py"
+SESSION_DATA_AUTH_CHECK="$ROOT_DIR/scripts/check-session-data-authorization.py"
+TLS_FIXTURE_CHECK="$ROOT_DIR/scripts/check-demo-tls-fixture.sh"
+TLS_FIXTURE_TEST="$ROOT_DIR/tests/check-demo-tls-fixture.sh"
+ORIGIN_HEADER_NAME_CHECK="$ROOT_DIR/scripts/check-origin-header-name-normalization.py"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
 DATA="$ROOT_DIR/src/socketio_data.erl"
@@ -28,10 +53,12 @@ WEBSOCKET="$ROOT_DIR/src/socketio_transport_websocket.erl"
 XHR_MULTIPART="$ROOT_DIR/src/socketio_transport_xhr_multipart.erl"
 HTMLFILE="$ROOT_DIR/src/socketio_transport_htmlfile.erl"
 POLLING="$ROOT_DIR/src/socketio_transport_polling.erl"
+HTTP="$ROOT_DIR/src/socketio_http.erl"
 DEMO="$ROOT_DIR/demo/demo.erl"
 
 for path in \
   "README.md" \
+  "RUNTIME_VERIFICATION.md" \
   "SECURITY.md" \
   "VISION.md" \
   "Makefile" \
@@ -40,10 +67,12 @@ for path in \
   "src/socketio.app.src" \
   "src/socketio_data.erl" \
   "src/socketio_listener.erl" \
+  "src/socketio_request_security.erl" \
   "src/socketio_transport_websocket.erl" \
   "demo/demo.erl" \
   "test/socketio_data_tests.erl" \
   "test/socketio_listener_tests.erl" \
+  "test/socketio_request_security_tests.erl" \
   ".gitmodules" \
   "CHANGES.md" \
   ".github/workflows/check.yml" \
@@ -57,6 +86,31 @@ for path in \
   "docs/plans/2026-06-10-ci-baseline.md" \
   "docs/plans/2026-06-10-web-origin-boundary.md" \
   "docs/plans/2026-06-12-origin-host-case-normalization.md" \
+  "docs/plans/2026-06-13-origin-header-cardinality.md" \
+  "docs/plans/2026-06-15-001-origin-header-name-normalization.md" \
+  "docs/plans/2026-06-13-socketio-submodule-identity.md" \
+  "docs/plans/2026-06-13-polling-authorization-order.md" \
+  "docs/plans/2026-06-13-location-independent-make.md" \
+  "scripts/check-polling-authorization-order.py" \
+  "docs/plans/2026-06-14-xhr-multipart-authorization-order.md" \
+  "scripts/check-xhr-multipart-authorization-order.py" \
+  "docs/plans/2026-06-14-htmlfile-authorization-order.md" \
+  "scripts/check-htmlfile-authorization-order.py" \
+  "docs/plans/2026-06-14-websocket-origin-authorization.md" \
+  "scripts/check-websocket-origin-authorization.py" \
+  "docs/plans/2026-06-14-http-session-origin-authorization.md" \
+  "docs/plans/2026-06-15-returning-polling-origin-authorization.md" \
+  "docs/plans/2026-06-15-session-data-authorization-before-lookup.md" \
+  "docs/plans/2026-06-17-demo-tls-fixture-integrity.md" \
+  "docs/plans/2026-06-19-session-ownership-and-resource-bounds.md" \
+  "docs/plans/2026-06-14-earling-runtime-verification.md" \
+  "scripts/check-http-session-origin-authorization.py" \
+  "scripts/check-returning-polling-authorization.py" \
+  "scripts/check-session-data-authorization.py" \
+  "scripts/check-demo-tls-fixture.sh" \
+  "tests/check-demo-tls-fixture.sh" \
+  "tests/check-security-boundaries.py" \
+  "scripts/check-origin-header-name-normalization.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
   "docs/plans/2026-06-08-earling-web-sockets-maintenance-baseline.md"; do
@@ -64,6 +118,141 @@ for path in \
     printf '%s\n' "Required file missing: $path" >&2
     exit 1
   fi
+done
+
+for runtime_contract in \
+  "Commit: pending implementation commit" \
+  "Pull request: pending" \
+  "Evidence status: not run" \
+  "isolated legacy-compatible Erlang/OTP environment" \
+  "Required sanitized evidence" \
+  "Use only \`pass\`, \`fail\`, \`blocked\`, or \`not run\`" \
+  "A Python checker, shell contract, or source review cannot mark a runtime" \
+  "No Erlang compile, EUnit, transport client, HTTP demo, SSL demo, or browser"; do
+  if ! grep -Fq "$runtime_contract" "$RUNTIME_VERIFICATION"; then
+    printf '%s\n' "Runtime verification matrix contract is missing: $runtime_contract" >&2
+    exit 1
+  fi
+done
+
+if [ "$(grep -Ec '^\| [0-9]+ \|' "$RUNTIME_VERIFICATION")" -ne 18 ] ||
+  [ "$(grep -Ec '^\| [0-9]+ \|.*\| not run \|$' "$RUNTIME_VERIFICATION")" -ne 18 ]; then
+  printf '%s\n' "Runtime verification matrix must retain 18 explicitly not-run scenarios." >&2
+  exit 1
+fi
+
+for runtime_scenario in \
+  "Erlang and rebar environment" \
+  "Socket.IO dependency identity" \
+  "Legacy project compile" \
+  "EUnit suite" \
+  "WebSocket allowed origin" \
+  "WebSocket denied origin" \
+  "XHR polling transport" \
+  "JSONP polling transport" \
+  "XHR multipart transport" \
+  "HTMLFile transport" \
+  "Heartbeat and timeout timers" \
+  "Malformed and oversized frames" \
+  "HTTP demo lifecycle" \
+  "SSL demo fixture boundary" \
+  "Cross-Origin session reuse" \
+  "Session identifier bounds" \
+  "POST resource bounds" \
+  "JSONP preallocation bounds"; do
+  if [ "$(grep -Fc "| $runtime_scenario |" "$RUNTIME_VERIFICATION")" -ne 1 ]; then
+    printf '%s\n' "Runtime verification scenario is missing or duplicated: $runtime_scenario" >&2
+    exit 1
+  fi
+done
+
+for runtime_guidance in \
+  "RUNTIME_VERIFICATION.md" \
+  "synthetic origins and payloads" \
+  "sanitized results"; do
+  if ! grep -Fq "$runtime_guidance" "$README"; then
+    printf '%s\n' "README runtime verification guidance is missing: $runtime_guidance" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq "Keep exact-head Erlang/OTP, transport-client, and demo-server evidence" "$VISION" ||
+  ! grep -Fq "Runtime compatibility, transport, and demo-server claims require" "$SECURITY" ||
+  ! grep -Fq "Added an exact-head Earling legacy runtime verification matrix" "$ROOT_DIR/CHANGES.md"; then
+  printf '%s\n' "Project guidance must retain the Earling runtime evidence boundary." >&2
+  exit 1
+fi
+
+for runtime_plan_contract in \
+  "status: completed" \
+  "## Status: Completed" \
+  "## Work Completed" \
+  "## Verification Completed" \
+  "Twelve isolated hostile documentation mutations were rejected" \
+  "all 14 runtime"; do
+  if ! grep -Fq "$runtime_plan_contract" "$RUNTIME_VERIFICATION_PLAN"; then
+    printf '%s\n' "Runtime verification plan must record completed evidence: $runtime_plan_contract" >&2
+    exit 1
+  fi
+done
+
+python3 "$POLLING_AUTH_CHECK" "$POLLING"
+python3 "$XHR_MULTIPART_AUTH_CHECK" "$XHR_MULTIPART"
+python3 "$HTMLFILE_AUTH_CHECK" "$HTMLFILE"
+python3 "$WEBSOCKET_AUTH_CHECK" "$ROOT_DIR/src/socketio_http_misultin.erl" "$ROOT_DIR/src/socketio_http.erl"
+python3 "$HTTP_SESSION_AUTH_CHECK" "$HTTP"
+python3 "$RETURNING_POLLING_AUTH_CHECK" "$HTTP"
+python3 "$SESSION_DATA_AUTH_CHECK" "$HTTP"
+python3 "$ORIGIN_HEADER_NAME_CHECK"
+python3 "$ROOT_DIR/tests/check-security-boundaries.py"
+
+for session_resource_contract in \
+  "status: pending_hosted_verification" \
+  "Sessions were keyed only by UUID" \
+  "Content-Length" \
+  "7a5197c1e74d1f3a050b330e41e4b6e63afb209c" \
+  "Erlang/OTP 29" \
+  "Exact-head GitHub Actions and CodeQL checks remain pending"; do
+  if ! grep -Fq "$session_resource_contract" "$SESSION_RESOURCE_PLAN"; then
+    printf '%s\n' "Session ownership/resource plan is missing: $session_resource_contract" >&2
+    exit 1
+  fi
+done
+
+for websocket_auth_doc in AGENTS.md README.md SECURITY.md VISION.md CHANGES.md; do
+  grep -Fq "WebSocket upgrades authorize Origin headers before creating sessions." "$ROOT_DIR/$websocket_auth_doc" || exit 1
+done
+for http_session_auth_doc in AGENTS.md README.md SECURITY.md VISION.md CHANGES.md; do
+  grep -Fq "New HTTP transport requests authorize Origin headers before creating sessions." "$ROOT_DIR/$http_session_auth_doc" || exit 1
+  grep -Fq "Returning polling GET requests authorize Origin headers before session lookup or transport dispatch." "$ROOT_DIR/$http_session_auth_doc" || exit 1
+  grep -Fq "Session data POST requests authorize Origin headers before session lookup or transport dispatch." "$ROOT_DIR/$http_session_auth_doc" || exit 1
+done
+for http_session_plan_contract in \
+  "Status: Completed" \
+  "## Work Completed" \
+  "## Verification Completed" \
+  "Eight hostile mutations were rejected" \
+  "Erlang EUnit was unavailable locally"; do
+  grep -Fq "$http_session_plan_contract" "$HTTP_SESSION_AUTH_PLAN" || exit 1
+done
+for returning_polling_plan_contract in \
+  "Status: Completed" \
+  "## Work Completed" \
+  "## Verification Completed" \
+  "Ten isolated hostile mutations were rejected" \
+  "Erlang EUnit was unavailable locally"; do
+  grep -Fq "$returning_polling_plan_contract" "$RETURNING_POLLING_AUTH_PLAN" || exit 1
+done
+for session_data_plan_contract in \
+  "status: completed" \
+  "## Status: Completed" \
+  "## Work Completed" \
+  "## Verification Completed" \
+  "hostile mutations were rejected"; do
+  grep -Fq "$session_data_plan_contract" "$SESSION_DATA_AUTH_PLAN" || exit 1
+done
+for contract in "Status: Completed" "make check" "hostile mutations"; do
+  grep -Fq "$contract" "$WEBSOCKET_AUTH_PLAN" || exit 1
 done
 
 if ! grep -Fq "Erlang/OTP" "$README" ||
@@ -122,22 +311,116 @@ if ! grep -Fq "demo/test_privkey.pem" "$README" ||
   exit 1
 fi
 
+if [ ! -x "$TLS_FIXTURE_CHECK" ] || [ ! -x "$TLS_FIXTURE_TEST" ]; then
+  printf '%s\n' "Demo TLS fixture checker and regression suite must remain executable." >&2
+  exit 1
+fi
+
+for tls_contract in \
+  "EXPECTED_FINGERPRINT='88:32:97:52:0C:98:78:34:A5:D0:AF:BE:91:4A:03:30:90:A2:DD:FB:89:B7:DD:DE:80:4A:65:41:25:E9:49:8D'" \
+  "EXPECTED_NOT_AFTER='notAfter=Apr 17 17:47:38 2020 GMT'" \
+  "Proc-Type: 4,ENCRYPTED" \
+  'FIXTURE_PASSWORD=misultin' \
+  'cmp -s "$TMP_ROOT/certificate-public.der" "$TMP_ROOT/key-public.der"' \
+  "certificate and private key do not match"; do
+  if ! grep -Fq "$tls_contract" "$TLS_FIXTURE_CHECK"; then
+    printf '%s\n' "Demo TLS fixture checker contract is missing: $tls_contract" >&2
+    exit 1
+  fi
+done
+
+for tls_test_contract in \
+  "certificate-replacement" \
+  "key-replacement" \
+  "password-drift" \
+  "encryption-marker-removal" \
+  "wrong-key-password" \
+  "scanner output exposed"; do
+  if ! grep -Fq "$tls_test_contract" "$TLS_FIXTURE_TEST"; then
+    printf '%s\n' "Demo TLS fixture regression contract is missing: $tls_test_contract" >&2
+    exit 1
+  fi
+done
+
+"$TLS_FIXTURE_CHECK"
+"$TLS_FIXTURE_TEST"
+
+if ! grep -Fq 'TLS fixture integrity is verified with OpenSSL' "$README" || \
+  ! grep -Fq 'OpenSSL verifies the reviewed demo certificate fingerprint' "$SECURITY" || \
+  ! grep -Fq 'Verify the encrypted demo TLS fixture identity with OpenSSL' "$VISION" || \
+  ! grep -Fq 'demo TLS fixtures must retain the reviewed fingerprint' "$ROOT_DIR/AGENTS.md" || \
+  ! grep -Fq 'Added OpenSSL-backed integrity checks for the encrypted demo TLS fixture pair' "$ROOT_DIR/CHANGES.md"; then
+  printf '%s\n' "Project guidance must document executable demo TLS fixture integrity." >&2
+  exit 1
+fi
+
+tls_plan_status=$(sed -n 's/^status: //p' "$TLS_FIXTURE_PLAN")
+case "$tls_plan_status" in
+  pending_hosted_verification)
+    grep -Fq 'Exact-head hosted checks remain pending.' "$TLS_FIXTURE_PLAN" || exit 1
+    ;;
+  completed)
+    for tls_hosted_contract in \
+      'Both exact-head push and pull-request checks passed.' \
+      'e6867db7d6b4b0752d921df679b5873d7629f700' \
+      'push run `27663517326`' \
+      'pull-request run `27663518524`'; do
+      grep -Fq "$tls_hosted_contract" "$TLS_FIXTURE_PLAN" || exit 1
+    done
+    ;;
+  *)
+    printf '%s\n' "Demo TLS fixture plan must be pending hosted verification or completed." >&2
+    exit 1
+    ;;
+esac
+
+for tls_plan_contract in \
+  'repository-root and external-directory `make check`' \
+  'isolated hostile mutations were rejected' \
+  'No Erlang compile, EUnit, listener, transport-client, HTTP demo, SSL demo, or browser'; do
+  if ! grep -Fq "$tls_plan_contract" "$TLS_FIXTURE_PLAN"; then
+    printf '%s\n' "Demo TLS fixture plan must retain truthful local evidence: $tls_plan_contract" >&2
+    exit 1
+  fi
+done
+
 if ! grep -Fq "command -v erl" "$MAKEFILE" ||
   ! grep -Fq "command -v escript" "$MAKEFILE" ||
+  ! grep -Fq 'ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))' "$MAKEFILE" ||
+  [ "$(grep -Fc '"$(ROOT)/rebar"' "$MAKEFILE")" -ne 3 ] ||
+  [ "$(grep -Fc '"$(ROOT)/scripts/check-baseline.sh"' "$MAKEFILE")" -ne 1 ] ||
   ! grep -Fq "lint: verify" "$MAKEFILE" ||
   ! grep -Fq "check: verify" "$MAKEFILE"; then
   printf '%s\n' "Makefile must preflight Erlang erl/escript before rebar targets and expose make lint/check." >&2
   exit 1
 fi
 
+if ! grep -Fq "status: completed" "$LOCATION_MAKE_PLAN" ||
+  ! grep -Fq "external working directory" "$LOCATION_MAKE_PLAN" ||
+  ! grep -Fq "hostile mutations were rejected" "$LOCATION_MAKE_PLAN" ||
+  ! grep -Fq "EUnit was not executed" "$LOCATION_MAKE_PLAN"; then
+  printf '%s\n' "Location-independent Make plan must record completed verification and runtime limits." >&2
+  exit 1
+fi
+
+if ! grep -Fq "absolute" "$README" ||
+  ! grep -Fq "Makefile path" "$README" ||
+  ! grep -Fq "location-independent Make targets" "$VISION" ||
+  ! grep -Fq "Rooted Make targets" "$ROOT_DIR/CHANGES.md" ||
+  ! grep -Fq "Make targets resolve repository tools" "$ROOT_DIR/AGENTS.md"; then
+  printf '%s\n' "Project guidance must document location-independent Make verification." >&2
+  exit 1
+fi
+
 if ! grep -Fq "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" "$CI_WORKFLOW" ||
   ! grep -Fq "run: EARLING_STATIC_ONLY=1 make check" "$CI_WORKFLOW" ||
+  [ "$(grep -Fc "run: openssl version" "$CI_WORKFLOW")" -ne 1 ] ||
   ! grep -Fq "permissions:" "$CI_WORKFLOW" ||
   ! grep -Fq "contents: read" "$CI_WORKFLOW" ||
   ! grep -Fq "workflow_dispatch:" "$CI_WORKFLOW" ||
   ! grep -Fq "cancel-in-progress: true" "$CI_WORKFLOW" ||
   ! grep -Fq "timeout-minutes: 5" "$CI_WORKFLOW"; then
-  printf '%s\n' "GitHub Actions workflow must pin checkout and run the bounded, read-only make check baseline." >&2
+  printf '%s\n' "GitHub Actions workflow must verify OpenSSL availability once, pin checkout, and run the bounded, read-only make check baseline." >&2
   exit 1
 fi
 
@@ -213,6 +496,67 @@ fi
 if ! grep -Fq "case-insensitively" "$README" ||
   ! grep -Fq "case-insensitively" "$SECURITY"; then
   printf '%s\n' "README and SECURITY must document case-insensitive origin hosts." >&2
+  exit 1
+fi
+
+for origin_header_contract in \
+  "verify_origin_headers(Headers, Origins)" \
+  "origin_header_values(Headers)" \
+  'lists:member($,, Origin)' \
+  "missing_origin_header_is_absent_test" \
+  "single_origin_header_is_verified_test" \
+  "duplicate_origin_headers_are_rejected_test" \
+  "comma_joined_origin_header_is_rejected_test" \
+  "empty_origin_header_is_rejected_test" \
+  "non_list_origin_header_is_rejected_test"; do
+  if ! grep -Fq "$origin_header_contract" "$LISTENER" "$LISTENER_TESTS"; then
+    printf '%s\n' "Origin header cardinality contract is missing: $origin_header_contract" >&2
+    exit 1
+  fi
+done
+
+if grep -Fq "proplists:get_all_values('Origin', Headers)" "$LISTENER"; then
+  printf '%s\n' "Origin header verification must not use exact-atom-only lookup." >&2
+  exit 1
+fi
+
+if [ "$(grep -Fc 'socketio_listener:verify_origin_headers' "$POLLING")" -ne 1 ] ||
+  [ "$(grep -Fc 'socketio_listener:verify_origin_headers' "$XHR_MULTIPART")" -ne 2 ] ||
+  grep -Fq "proplists:get_value('Origin', Headers)" "$POLLING" "$XHR_MULTIPART"; then
+  printf '%s\n' "CORS transports must use the shared Origin header verifier at each guarded request boundary." >&2
+  exit 1
+fi
+
+if ! grep -Fq 'status: completed' "$ORIGIN_HEADER_NAME_PLAN" || \
+  ! grep -Fq 'EARLING_STATIC_ONLY=1 make check' "$ORIGIN_HEADER_NAME_PLAN" || \
+  ! grep -Fq 'hostile mutations' "$ORIGIN_HEADER_NAME_PLAN" || \
+  ! grep -Fq 'EUnit was not executed' "$ORIGIN_HEADER_NAME_PLAN"; then
+  printf '%s\n' "Origin header-name normalization plan must record truthful completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq 'Origin field names are matched case-insensitively' "$README" || \
+  ! grep -Fq 'Origin field names must be matched case-insensitively' "$SECURITY" || \
+  ! grep -Fq 'Match Origin field names case-insensitively' "$VISION" || \
+  ! grep -Fq 'Origin header names must be matched case-insensitively' "$ROOT_DIR/AGENTS.md" || \
+  ! grep -Fq 'Matched Origin header names case-insensitively' "$ROOT_DIR/CHANGES.md"; then
+  printf '%s\n' "Project guidance must document case-insensitive Origin field names." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$ORIGIN_HEADER_PLAN" ||
+  ! grep -Fq "EUnit was not executed" "$ORIGIN_HEADER_PLAN" ||
+  ! grep -Fq "hostile mutations were rejected" "$ORIGIN_HEADER_PLAN"; then
+  printf '%s\n' "Origin header cardinality plan must record truthful completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "comma-joined Origin headers fail closed" "$README" ||
+  ! grep -Fq "comma-joined" "$SECURITY" ||
+  ! grep -Fq "comma-joined Origin headers fail closed" "$VISION" ||
+  ! grep -Fq "Origin header verification must reject" "$ROOT_DIR/AGENTS.md" ||
+  ! grep -Fq "Reject duplicate, empty, non-list, and comma-joined Origin headers" "$ROOT_DIR/CHANGES.md"; then
+  printf '%s\n' "Project guidance must document ambiguous Origin header rejection." >&2
   exit 1
 fi
 
@@ -311,8 +655,65 @@ if [ "$demo_port_count" -ne 1 ]; then
   exit 1
 fi
 
-if ! grep -Fq "branch = 06" "$ROOT_DIR/.gitmodules"; then
-  printf '%s\n' "Socket.IO client submodule must remain pinned to the legacy 06 branch." >&2
+python3 - "$ROOT_DIR/.gitmodules" <<'PY'
+import configparser
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+config = configparser.ConfigParser(interpolation=None)
+config.read(path)
+expected_section = 'submodule "priv/Socket.IO"'
+if config.sections() != [expected_section]:
+    raise SystemExit("Exactly one canonical Socket.IO submodule section is required.")
+expected = {
+    "path": "priv/Socket.IO",
+    "url": "https://github.com/LearnBoost/socket.io-client.git",
+}
+if dict(config[expected_section]) != expected:
+    raise SystemExit("Socket.IO submodule path and HTTPS URL must remain canonical.")
+PY
+
+expected_gitlink='160000 7a5197c1e74d1f3a050b330e41e4b6e63afb209c 0'
+actual_gitlink=$(git -C "$ROOT_DIR" ls-files --stage priv/Socket.IO | awk '{print $1 " " $2 " " $3}')
+if [ "$actual_gitlink" != "$expected_gitlink" ]; then
+  printf '%s\n' "Socket.IO client must remain pinned to the reviewed 0.6 gitlink." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$SUBMODULE_PLAN" ||
+  ! grep -Fq "EARLING_STATIC_ONLY=1 make check" "$SUBMODULE_PLAN" ||
+  ! grep -Fq "source from HTTPS to HTTP failed" "$SUBMODULE_PLAN" ||
+  ! grep -Fq 'unreviewed `update` option failed' "$SUBMODULE_PLAN"; then
+  printf '%s\n' "Socket.IO submodule identity plan must record completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$POLLING_AUTH_PLAN" ||
+  ! grep -Fq "EARLING_STATIC_ONLY=1 make check" "$POLLING_AUTH_PLAN" ||
+  ! grep -Fq "hostile source mutations were rejected" "$POLLING_AUTH_PLAN"; then
+  printf '%s\n' "Polling authorization-order plan must record completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$XHR_MULTIPART_AUTH_PLAN" ||
+  ! grep -Fq "EARLING_STATIC_ONLY=1 make check" "$XHR_MULTIPART_AUTH_PLAN" ||
+  ! grep -Fq "hostile source mutations were rejected" "$XHR_MULTIPART_AUTH_PLAN"; then
+  printf '%s\n' "XHR multipart authorization-order plan must record completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "status: completed" "$HTMLFILE_AUTH_PLAN" ||
+  ! grep -Fq "EARLING_STATIC_ONLY=1 make check" "$HTMLFILE_AUTH_PLAN" ||
+  ! grep -Fq "hostile source mutations were rejected" "$HTMLFILE_AUTH_PLAN"; then
+  printf '%s\n' "HTMLFile authorization-order plan must record completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "only submodule" "$README" ||
+  ! grep -Fq "exactly one submodule" "$SECURITY" ||
+  ! grep -Fq "only submodule" "$VISION"; then
+  printf '%s\n' "Project guidance must document the canonical submodule identity." >&2
   exit 1
 fi
 
@@ -393,6 +794,45 @@ fi
 
 if ! grep -Fq "make check" "$CI_PLAN"; then
   printf '%s\n' "Earling CI baseline plan must record make check verification." >&2
+  exit 1
+fi
+
+for workflow_contract in \
+  "runs-on: ubuntu-24.04" \
+  "permissions:" \
+  "contents: read" \
+  "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" \
+  "persist-credentials: false" \
+  "timeout-minutes: 5" \
+  "run: openssl version" \
+  "EARLING_STATIC_ONLY=1 make check"; do
+  if ! grep -Fq "$workflow_contract" "$CI_WORKFLOW"; then
+    printf '%s\n' "Earling CI workflow must keep contract: $workflow_contract" >&2
+    exit 1
+  fi
+done
+
+workflow_paths=$(find "$ROOT_DIR/.github/workflows" -type f \( -name '*.yml' -o -name '*.yaml' \) -print | LC_ALL=C sort)
+if [ "$workflow_paths" != "$CI_WORKFLOW" ]; then
+  printf '%s\n' "The canonical Earling check must be the only GitHub Actions workflow." >&2
+  exit 1
+fi
+
+if [ "$(grep -Fc "actions/checkout@" "$CI_WORKFLOW")" -ne 1 ] ||
+  [ "$(grep -Fc "persist-credentials:" "$CI_WORKFLOW")" -ne 1 ] ||
+  grep -Fq "persist-credentials: true" "$CI_WORKFLOW"; then
+  printf '%s\n' "Earling CI must use one pinned checkout with credential persistence disabled." >&2
+  exit 1
+fi
+
+if [ "$(grep -Ec '^[[:space:]]*permissions:' "$CI_WORKFLOW")" -ne 1 ] ||
+  grep -Eq 'write-all|contents:[[:space:]]*write|pull-requests:[[:space:]]*write|actions:[[:space:]]*write' "$CI_WORKFLOW"; then
+  printf '%s\n' "Earling CI permissions must remain globally read-only." >&2
+  exit 1
+fi
+
+if grep -Fq "ubuntu-latest" "$CI_WORKFLOW"; then
+  printf '%s\n' "Earling CI must not use a floating Ubuntu runner." >&2
   exit 1
 fi
 

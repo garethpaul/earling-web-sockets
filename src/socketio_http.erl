@@ -94,102 +94,111 @@ handle_call({request, 'GET', ["WebSocketMain.swf", "web-socket-js", "vendor", "l
     {reply, Response, State};
 
 %% New XHR Polling request
-handle_call({request, 'GET', [_Random, "xhr-polling"|Resource], Req }, From, #state{ resource = Resource} = State) ->
-    handle_call({session, generate, {'xhr-polling', Req}, socketio_transport_polling}, From, State);
+handle_call({request, 'GET', [_Random, "xhr-polling"|Resource], Req }, From,
+            #state{ resource = Resource, server_module = ServerModule } = State) ->
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        {ok, Origin} ->
+            handle_call({session, generate, {'xhr-polling', Req}, socketio_transport_polling, Origin}, From, State)
+    end;
 
 %% Returning XHR Polling
 handle_call({request, 'GET', [_Random, SessionId, "xhr-polling"|Resource], Req }, From, 
             #state{ server_module = ServerModule,
                     resource = Resource, sessions = Sessions } = State) ->
-    case ets:lookup(Sessions, SessionId) of
-        [{SessionId, Pid}] -> 
-            gen_server:cast(Pid, {'xhr-polling', polling_request, Req, From});
-        _ ->
-            gen_server:reply(From, apply(ServerModule, respond, [Req, 404, ""]))
-    end,
-    {noreply, State};
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        {ok, RequestOrigin} ->
+            case owned_session(Sessions, SessionId, RequestOrigin) of
+                {ok, Pid} ->
+                    gen_server:cast(Pid, {'xhr-polling', polling_request, Req, From});
+                error ->
+                    gen_server:reply(From, apply(ServerModule, respond, [Req, 404, ""]))
+            end,
+            {noreply, State}
+    end;
 
 %% Incoming XHR Polling data
-handle_call({request, 'POST', ["send", SessionId, "xhr-polling"|Resource], Req }, _From, #state{ resource = Resource, 
-                                                                                                 server_module = ServerModule,
-                                                                                                 sessions = Sessions } = State) ->
-    Response =  
-        case ets:lookup(Sessions, SessionId) of
-            [{SessionId, Pid}] -> 
-                gen_server:call(Pid, {'xhr-polling', data, Req});
-            _ ->
-                apply(ServerModule, respond, [Req, 404, ""])
-        end,
+handle_call({request, 'POST', ["send", SessionId, "xhr-polling"|Resource], Req }, _From,
+            #state{ resource = Resource } = State) ->
+    Response = handle_session_data('xhr-polling', SessionId, Req, State),
     {reply, Response, State};
 
 %% New JSONP Polling request
-handle_call({request, 'GET', [Index, _Random, "jsonp-polling"|Resource], Req }, From, #state{ resource = Resource} = State) ->
-    handle_call({session, generate, {'jsonp-polling', {Req, Index}}, socketio_transport_polling}, From, State);
+handle_call({request, 'GET', [Index, _Random, "jsonp-polling"|Resource], Req }, From,
+            #state{ resource = Resource, server_module = ServerModule } = State) ->
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        {ok, Origin} ->
+            case socketio_request_security:valid_jsonp_index(Index) of
+                true ->
+                    handle_call({session, generate, {'jsonp-polling', {Req, Index}}, socketio_transport_polling, Origin}, From, State);
+                false ->
+                    {reply, apply(ServerModule, respond, [Req, 400, "invalid jsonp index"]), State}
+            end
+    end;
 
 %% Returning JSONP Polling
 handle_call({request, 'GET', [Index, _Random, SessionId, "jsonp-polling"|Resource], Req }, From, 
             #state{ resource = Resource, 
                     server_module = ServerModule,
                     sessions = Sessions } = State) ->
-    case ets:lookup(Sessions, SessionId) of
-        [{SessionId, Pid}] ->
-            gen_server:cast(Pid, {'jsonp-polling', polling_request, {Req, Index}, From});
-        _ ->
-            gen_server:reply(From, apply(ServerModule, respond, [Req, 404, ""]))
-    end,
-    {noreply, State};
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        {ok, RequestOrigin} ->
+            case socketio_request_security:valid_jsonp_index(Index) andalso
+                 owned_session(Sessions, SessionId, RequestOrigin) of
+                {ok, Pid} ->
+                    gen_server:cast(Pid, {'jsonp-polling', polling_request, {Req, Index}, From});
+                _ ->
+                    gen_server:reply(From, apply(ServerModule, respond, [Req, 404, ""]))
+            end,
+            {noreply, State}
+    end;
 
 %% Incoming JSONP Polling data
 handle_call({request, 'POST', [_Index, _Random, SessionId, "jsonp-polling"|Resource], Req }, _From, 
-            #state{ resource = Resource, 
-                    server_module = ServerModule,
-                    sessions = Sessions } = State) ->
-    Response =  
-        case ets:lookup(Sessions, SessionId) of
-            [{SessionId, Pid}] -> 
-                gen_server:call(Pid, {'jsonp-polling', data, Req});
-            _ ->
-                apply(ServerModule, respond, [Req, 404, ""])
-        end,
+            #state{ resource = Resource } = State) ->
+    Response = handle_session_data('jsonp-polling', SessionId, Req, State),
     {reply, Response, State};
 
 %% New XHR Multipart request
-handle_call({request, 'GET', ["xhr-multipart"|Resource], Req }, From, #state{ resource = Resource} = State) ->
-    handle_call({session, generate, {'xhr-multipart', {Req, From}}, socketio_transport_xhr_multipart}, From, State),
-    {noreply, State};
+handle_call({request, 'GET', ["xhr-multipart"|Resource], Req }, From,
+            #state{ resource = Resource, server_module = ServerModule } = State) ->
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        {ok, Origin} ->
+            handle_call({session, generate, {'xhr-multipart', {Req, From}}, socketio_transport_xhr_multipart, Origin}, From, State),
+            {noreply, State}
+    end;
 
 %% Incoming XHR Multipart data
 handle_call({request, 'POST', ["send", SessionId, "xhr-multipart"|Resource], Req }, _From, 
-            #state{ resource = Resource, 
-                    server_module = ServerModule,
-                    sessions = Sessions } = State) ->
-    Response =  
-        case ets:lookup(Sessions, SessionId) of
-            [{SessionId, Pid}] -> 
-                gen_server:call(Pid, {'xhr-multipart', data, Req});
-            _ ->
-                apply(ServerModule, respond, [Req, 404, ""])
-        end,
+            #state{ resource = Resource } = State) ->
+    Response = handle_session_data('xhr-multipart', SessionId, Req, State),
     {reply, Response, State};
 
 
 %% New htmlfile request
-handle_call({request, 'GET', [_Random, "htmlfile"|Resource], Req }, From, #state{ resource = Resource} = State) ->
-    handle_call({session, generate, {'htmlfile', {Req, From}}, socketio_transport_htmlfile}, From, State),
-    {noreply, State};
+handle_call({request, 'GET', [_Random, "htmlfile"|Resource], Req }, From,
+            #state{ resource = Resource, server_module = ServerModule } = State) ->
+    case authorize_session_request(Req, State) of
+        false ->
+            {reply, apply(ServerModule, respond, [Req, 405, "unauthorized"]), State};
+        {ok, Origin} ->
+            handle_call({session, generate, {'htmlfile', {Req, From}}, socketio_transport_htmlfile, Origin}, From, State),
+            {noreply, State}
+    end;
 
 %% Incoming htmlfile data
 handle_call({request, 'POST', ["send", SessionId, "htmlfile"|Resource], Req }, _From, 
-            #state{ resource = Resource, 
-                    server_module = ServerModule,
-                    sessions = Sessions } = State) ->
-    Response =  
-        case ets:lookup(Sessions, SessionId) of
-            [{SessionId, Pid}] -> 
-                gen_server:call(Pid, {'htmlfile', data, Req});
-            _ ->
-                apply(ServerModule, respond, [Req, 404, ""])
-        end,
+            #state{ resource = Resource } = State) ->
+    Response = handle_session_data('htmlfile', SessionId, Req, State),
     {reply, Response, State};
 
 
@@ -204,7 +213,13 @@ handle_call({request, Method, Path, Req}, _From, #state{ default_http_handler = 
     {reply, Response, State};
 
 %% Sessions
-handle_call({session, generate, ConnectionReference, Transport}, _From, #state{ 
+handle_call({websocket, authorize, Headers}, _From, State) ->
+    Authorized = socketio_listener:authorize_origin_headers(
+        Headers,
+        socketio_listener:origins(listener(State))),
+    {reply, Authorized, State};
+
+handle_call({session, generate, ConnectionReference, Transport, Origin}, _From, #state{
                                                                    sup = Sup,
                                                                    sessions = Sessions,
                                                                    event_manager = EventManager,
@@ -214,7 +229,7 @@ handle_call({session, generate, ConnectionReference, Transport}, _From, #state{
     UUID = binary_to_list(ossp_uuid:make(v4, text)),
     {ok, Pid} = socketio_client:start(Sup, Transport, UUID, ServerModule, ConnectionReference, Port),
     link(Pid),
-    ets:insert(Sessions, [{UUID, Pid}, {Pid, UUID}]),
+    ets:insert(Sessions, [{UUID, Pid, Origin}, {Pid, UUID}]),
     gen_event:notify(EventManager, {client, Pid}),
     {reply, {UUID, Pid}, State};
 
@@ -298,3 +313,44 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 listener(#state{ sup = Sup }) ->
     socketio_listener:server(Sup).
+
+handle_session_data(Transport, SessionId, Req,
+                    #state{ server_module = ServerModule,
+                            sessions = Sessions } = State) ->
+    case authorize_session_request(Req, State) of
+        false ->
+            apply(ServerModule, respond, [Req, 405, "unauthorized"]);
+        {ok, RequestOrigin} ->
+            case owned_session(Sessions, SessionId, RequestOrigin) of
+                {ok, Pid} ->
+                    case socketio_request_security:post_body_status(ServerModule:get_headers(Req)) of
+                        ok ->
+                            gen_server:call(Pid, {Transport, data, Req});
+                        {error, Code, Message} ->
+                            apply(ServerModule, respond, [Req, Code, Message])
+                    end;
+                error ->
+                    apply(ServerModule, respond, [Req, 404, ""])
+            end
+    end.
+
+authorize_session_request(Req, #state{ server_module = ServerModule } = State) ->
+    socketio_listener:authorize_origin_headers(
+      ServerModule:get_headers(Req),
+      socketio_listener:origins(listener(State))).
+
+owned_session(Sessions, SessionId, RequestOrigin) ->
+    case socketio_request_security:valid_session_id(SessionId) of
+        false ->
+            error;
+        true ->
+            case ets:lookup(Sessions, SessionId) of
+                [{SessionId, Pid, SessionOrigin}] ->
+                    case socketio_request_security:same_session_origin(SessionOrigin, RequestOrigin) of
+                        true -> {ok, Pid};
+                        false -> error
+                    end;
+                _ ->
+                    error
+            end
+    end.

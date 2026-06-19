@@ -1,5 +1,10 @@
 # Security Policy
 
+WebSocket upgrades authorize Origin headers before creating sessions.
+New HTTP transport requests authorize Origin headers before creating sessions.
+Returning polling GET requests authorize Origin headers before session lookup or transport dispatch.
+Session data POST requests authorize Origin headers before session lookup or transport dispatch.
+
 ## Supported Versions
 
 The supported security scope for `earling-web-sockets` is the current default branch, `master`. Older commits, tags, branches, forks, demos, and generated artifacts are not actively supported unless the repository explicitly marks them as maintained.
@@ -33,8 +38,21 @@ Helpful reports include:
   certificate/key files, and both are test-only fixtures for local SSL demos.
   Do not commit production certificates, private keys, tokens, generated
   secrets, local rebar dependency caches, or machine-local configuration.
-- GitHub Actions runs the static maintenance `make check` baseline with pinned
-  checkout, read-only repository access, and a five-minute timeout.
+- OpenSSL verifies the reviewed demo certificate fingerprint, historical
+  expiry metadata, encrypted private-key shape, fixture password, and matching
+  public keys. The expired self-signed pair is not production credential or
+  trust-chain material.
+- GitHub Actions runs the static maintenance `make check` baseline on Ubuntu
+  24.04 with pinned checkout, disabled credential persistence, read-only
+  repository access, and a five-minute timeout.
+- The static baseline permits exactly one submodule: `priv/Socket.IO` at the
+  canonical LearnBoost HTTPS URL and exact reviewed `0.6` gitlink
+  `7a5197c1e74d1f3a050b330e41e4b6e63afb209c`. URL, path, section, option, and
+  gitlink drift are rejected; the upstream repository has no `06` branch.
+- Runtime compatibility, transport, and demo-server claims require the
+  exact-head runtime verification matrix. The tracked demo certificate and
+  private key are test-only fixtures and cannot establish production TLS
+  suitability.
 
 ## Service and API Notes
 
@@ -47,11 +65,33 @@ Origin allow-list checks require a complete HTTP/HTTPS origin without userinfo,
 paths, queries, fragments, parser leftovers, or invalid explicit ports. Omitted
 ports normalize to 80 for HTTP and 443 for HTTPS before matching. Parsed and
 configured DNS hostnames compare case-insensitively, without treating suffixes
-or near-miss names as equal.
+or near-miss names as equal. Duplicate, empty, non-list, and comma-joined
+Origin headers fail closed before a transport emits CORS response headers.
+Origin field names must be matched case-insensitively across atom, string, and
+binary representations without converting request data into atoms.
+Polling POST bodies are not parsed or decoded until that Origin authorization
+succeeds.
+XHR multipart POST bodies follow the same fail-closed ordering and return the
+legacy unauthorized response before parsing disallowed requests.
+HTMLFile POST bodies also authorize first and return the legacy unauthorized
+response without parsing or decoding disallowed requests.
+Authorized sessions are owned by the canonical Origin identity that created
+them. A different allow-listed Origin cannot reuse a known session ID for
+returning polling or POST dispatch. Session IDs must be canonical lowercase
+UUIDv4 values before ETS lookup.
+
+Transport POSTs require exactly one decimal `Content-Length` no larger than
+1 MiB. Duplicate/malformed lengths and transfer encodings fail before the
+legacy body parser. JSONP callback indexes fail before session allocation.
 
 Socket.IO frame bodies are capped at 1 MiB before payload splitting so
 oversized declared frame lengths fail closed during decode.
 Socket.IO frame length prefixes are digit-bounded before integer parsing.
+
+The bundled 2012 rebar archive is not loadable by Erlang/OTP 29. Hosted checks
+therefore execute the dependency-free request-boundary EUnit suite and static
+contracts, while the historical full compile/EUnit path remains a separately
+documented legacy-runtime requirement.
 
 ## Dependency and Supply Chain Security
 

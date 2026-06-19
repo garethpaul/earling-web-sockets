@@ -1,5 +1,10 @@
 ## Earling Web Sockets Vision
 
+WebSocket upgrades authorize Origin headers before creating sessions.
+New HTTP transport requests authorize Origin headers before creating sessions.
+Returning polling GET requests authorize Origin headers before session lookup or transport dispatch.
+Session data POST requests authorize Origin headers before session lookup or transport dispatch.
+
 This document explains the current state and direction of the project.
 Project overview and developer docs: [`README.md`](README.md)
 
@@ -24,8 +29,13 @@ Priority:
 
 Current baseline:
 
+- The legacy browser client is the only submodule and remains fixed to its
+  canonical `priv/Socket.IO` path, LearnBoost HTTPS URL, and exact peeled `0.6`
+  tag commit `7a5197c1e74d1f3a050b330e41e4b6e63afb209c`.
 - `make deps`, `make`, and `make test` now verify `erl` and `escript` before
   invoking legacy `rebar`.
+- Keep location-independent Make targets rooted to the loaded repository
+  Makefile for checker and bundled rebar invocation.
 - `scripts/check-baseline.sh` runs full rebar tests when Erlang/OTP is
   available and static maintenance checks otherwise.
 - Malformed or relative Origin values fail closed instead of crashing listener
@@ -35,6 +45,18 @@ Current baseline:
   matching.
 - Origin allow-list hostnames compare case-insensitively while preserving exact
   hostname boundaries and explicit wildcard behavior.
+- Duplicate, empty, non-list, and comma-joined Origin headers fail closed before
+  polling or XHR-multipart transports emit CORS response headers.
+- Match Origin field names case-insensitively across parser representations.
+- Polling POST bodies are parsed and decoded only after Origin authorization.
+- XHR multipart POST bodies reject disallowed origins before parsing or decode.
+- HTMLFile POST bodies reject disallowed origins before parsing or decode.
+- Bind sessions to their canonical creating Origin, validate UUIDv4 session
+  identifiers before ETS access, and reject mismatched allowed Origins.
+- Bound transport POST bodies and validate JSONP callback indexes before body
+  parsing or session creation.
+- Keep standalone security EUnit tests runnable on current Erlang while
+  documenting that the bundled 2012 rebar archive cannot load on OTP 29.
 - Malformed Socket.IO frame input fails closed instead of crashing transport
   decode paths.
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.
@@ -44,8 +66,12 @@ Current baseline:
 - Demo SSL fixtures are limited to `demo/test_certificate.pem` and
   `demo/test_privkey.pem`, and both are documented as test-only local demo
   material.
+- Verify the encrypted demo TLS fixture identity with OpenSSL while keeping its
+  expired certificate explicitly unsuitable for production use.
 - Long-polling transports ignore stale heartbeat and polling timer references
   after timers are reset.
+- Keep exact-head Erlang/OTP, transport-client, and demo-server evidence
+  sanitized and separate from portable static verification.
 - Polling JSONP callback indexes are restricted to bounded non-empty digit
   strings before JavaScript response construction.
 - GitHub Actions runs the static maintenance `make check` baseline with pinned,
@@ -55,7 +81,6 @@ Next priorities:
 
 - Add clear maintenance-status and supported-client notes
 - Verify the rebar build and tests on a documented Erlang version
-- Define and reject ambiguous duplicate or comma-joined Origin headers
 - Bound synchronous transport calls made by the central HTTP router
 - Document SSL demo certificate usage
 - Tighten contribution and known-issues sections that the README lists as TODOs
