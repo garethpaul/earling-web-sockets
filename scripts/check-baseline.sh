@@ -33,6 +33,7 @@ HTTP_SESSION_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-http-session-origin-auth
 RETURNING_POLLING_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-15-returning-polling-origin-authorization.md"
 SESSION_DATA_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-15-session-data-authorization-before-lookup.md"
 TLS_FIXTURE_PLAN="$ROOT_DIR/docs/plans/2026-06-17-demo-tls-fixture-integrity.md"
+SESSION_RESOURCE_PLAN="$ROOT_DIR/docs/plans/2026-06-19-session-ownership-and-resource-bounds.md"
 RUNTIME_VERIFICATION="$ROOT_DIR/RUNTIME_VERIFICATION.md"
 RUNTIME_VERIFICATION_PLAN="$ROOT_DIR/docs/plans/2026-06-14-earling-runtime-verification.md"
 POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-polling-authorization-order.py"
@@ -66,10 +67,12 @@ for path in \
   "src/socketio.app.src" \
   "src/socketio_data.erl" \
   "src/socketio_listener.erl" \
+  "src/socketio_request_security.erl" \
   "src/socketio_transport_websocket.erl" \
   "demo/demo.erl" \
   "test/socketio_data_tests.erl" \
   "test/socketio_listener_tests.erl" \
+  "test/socketio_request_security_tests.erl" \
   ".gitmodules" \
   "CHANGES.md" \
   ".github/workflows/check.yml" \
@@ -99,12 +102,14 @@ for path in \
   "docs/plans/2026-06-15-returning-polling-origin-authorization.md" \
   "docs/plans/2026-06-15-session-data-authorization-before-lookup.md" \
   "docs/plans/2026-06-17-demo-tls-fixture-integrity.md" \
+  "docs/plans/2026-06-19-session-ownership-and-resource-bounds.md" \
   "docs/plans/2026-06-14-earling-runtime-verification.md" \
   "scripts/check-http-session-origin-authorization.py" \
   "scripts/check-returning-polling-authorization.py" \
   "scripts/check-session-data-authorization.py" \
   "scripts/check-demo-tls-fixture.sh" \
   "tests/check-demo-tls-fixture.sh" \
+  "tests/check-security-boundaries.py" \
   "scripts/check-origin-header-name-normalization.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
@@ -130,9 +135,9 @@ for runtime_contract in \
   fi
 done
 
-if [ "$(grep -Ec '^\| [0-9]+ \|' "$RUNTIME_VERIFICATION")" -ne 14 ] ||
-  [ "$(grep -Ec '^\| [0-9]+ \|.*\| not run \|$' "$RUNTIME_VERIFICATION")" -ne 14 ]; then
-  printf '%s\n' "Runtime verification matrix must retain 14 explicitly not-run scenarios." >&2
+if [ "$(grep -Ec '^\| [0-9]+ \|' "$RUNTIME_VERIFICATION")" -ne 18 ] ||
+  [ "$(grep -Ec '^\| [0-9]+ \|.*\| not run \|$' "$RUNTIME_VERIFICATION")" -ne 18 ]; then
+  printf '%s\n' "Runtime verification matrix must retain 18 explicitly not-run scenarios." >&2
   exit 1
 fi
 
@@ -150,7 +155,11 @@ for runtime_scenario in \
   "Heartbeat and timeout timers" \
   "Malformed and oversized frames" \
   "HTTP demo lifecycle" \
-  "SSL demo fixture boundary"; do
+  "SSL demo fixture boundary" \
+  "Cross-Origin session reuse" \
+  "Session identifier bounds" \
+  "POST resource bounds" \
+  "JSONP preallocation bounds"; do
   if [ "$(grep -Fc "| $runtime_scenario |" "$RUNTIME_VERIFICATION")" -ne 1 ]; then
     printf '%s\n' "Runtime verification scenario is missing or duplicated: $runtime_scenario" >&2
     exit 1
@@ -195,6 +204,20 @@ python3 "$HTTP_SESSION_AUTH_CHECK" "$HTTP"
 python3 "$RETURNING_POLLING_AUTH_CHECK" "$HTTP"
 python3 "$SESSION_DATA_AUTH_CHECK" "$HTTP"
 python3 "$ORIGIN_HEADER_NAME_CHECK"
+python3 "$ROOT_DIR/tests/check-security-boundaries.py"
+
+for session_resource_contract in \
+  "status: pending_hosted_verification" \
+  "Sessions were keyed only by UUID" \
+  "Content-Length" \
+  "7a5197c1e74d1f3a050b330e41e4b6e63afb209c" \
+  "Erlang/OTP 29" \
+  "Exact-head GitHub Actions and CodeQL checks remain pending"; do
+  if ! grep -Fq "$session_resource_contract" "$SESSION_RESOURCE_PLAN"; then
+    printf '%s\n' "Session ownership/resource plan is missing: $session_resource_contract" >&2
+    exit 1
+  fi
+done
 
 for websocket_auth_doc in AGENTS.md README.md SECURITY.md VISION.md CHANGES.md; do
   grep -Fq "WebSocket upgrades authorize Origin headers before creating sessions." "$ROOT_DIR/$websocket_auth_doc" || exit 1
@@ -646,11 +669,17 @@ if config.sections() != [expected_section]:
 expected = {
     "path": "priv/Socket.IO",
     "url": "https://github.com/LearnBoost/socket.io-client.git",
-    "branch": "06",
 }
 if dict(config[expected_section]) != expected:
-    raise SystemExit("Socket.IO submodule path, HTTPS URL, and branch must remain canonical.")
+    raise SystemExit("Socket.IO submodule path and HTTPS URL must remain canonical.")
 PY
+
+expected_gitlink='160000 7a5197c1e74d1f3a050b330e41e4b6e63afb209c 0'
+actual_gitlink=$(git -C "$ROOT_DIR" ls-files --stage priv/Socket.IO | awk '{print $1 " " $2 " " $3}')
+if [ "$actual_gitlink" != "$expected_gitlink" ]; then
+  printf '%s\n' "Socket.IO client must remain pinned to the reviewed 0.6 gitlink." >&2
+  exit 1
+fi
 
 if ! grep -Fq "status: completed" "$SUBMODULE_PLAN" ||
   ! grep -Fq "EARLING_STATIC_ONLY=1 make check" "$SUBMODULE_PLAN" ||

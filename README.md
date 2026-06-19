@@ -51,14 +51,18 @@ make deps
 ```
 
 The only submodule is `priv/Socket.IO`, using the canonical LearnBoost HTTPS
-repository and the legacy Socket.IO `06` client branch required by the demos.
+repository and reviewed Socket.IO `0.6` commit
+`7a5197c1e74d1f3a050b330e41e4b6e63afb209c`. The upstream repository no
+longer exposes the previously documented `06` branch, so the gitlink is the
+dependency identity boundary.
 
 ## Running or Using the Project
 
 - Run `make` to fetch legacy rebar dependencies and compile the Erlang app.
 - Run `make test` to execute the rebar EUnit path when Erlang/OTP is available.
-- The Socket.IO browser client submodule remains pinned to the legacy `06`
-  branch at its canonical HTTPS repository and path for protocol compatibility.
+- The Socket.IO browser client submodule remains pinned to the peeled `0.6`
+  tag commit `7a5197c1e74d1f3a050b330e41e4b6e63afb209c` at its canonical HTTPS
+  repository and path for protocol compatibility.
 - Demo certificates under `demo/test_certificate.pem` and
   `demo/test_privkey.pem` are test-only material for local SSL demos.
 - TLS fixture integrity is verified with OpenSSL: the reviewed expired
@@ -75,6 +79,15 @@ repository and the legacy Socket.IO `06` client branch required by the demos.
   and binary representations, and duplicates across representations fail closed.
   Polling, XHR multipart, and HTMLFile POST bodies are parsed and decoded only after this
   authorization succeeds.
+- Sessions retain the canonical Origin identity that created them. Returning
+  polling requests and POST data must present the same identity before session
+  lookup or dispatch, even when another Origin is independently allow-listed.
+- Session IDs must be canonical lowercase RFC 4122 UUIDv4 values before ETS
+  lookup. Invalid or oversized path values are rejected without probing the
+  session table.
+- Transport POSTs require one valid decimal `Content-Length` no larger than
+  1 MiB. Duplicate/malformed lengths and transfer encodings are rejected before
+  `parse_post/1`; JSONP callback indexes are validated before session creation.
 - Malformed Socket.IO frames decode to an empty message list instead of
   crashing transport handlers.
 - Socket.IO frame bodies larger than 1 MiB are rejected during decode before
@@ -93,23 +106,27 @@ Run the repository baseline gate:
 ```bash
 make check
 make lint
+make security-test
 scripts/check-baseline.sh
 ```
 
-`make check` runs the baseline gate, and `make lint` is an alias for the same
-static baseline. When Erlang/OTP is installed, the baseline gate runs
-`make test`. In documentation-only environments without `erl`/`escript`, it
-performs static guard checks and reports that the rebar tests were skipped.
+`make check` runs the baseline and dependency-free Erlang security tests, and
+`make lint` is an alias for the static baseline. `make security-test` compiles
+the request-boundary module and runs its EUnit suite without fetching the
+legacy dependency graph. When Erlang/OTP is installed, the non-static baseline
+also attempts `make test`; the bundled 2012 rebar archive cannot load on
+Erlang/OTP 29 and requires an older compatible OTP environment for the
+historical full compile/EUnit path. Without `erl`/`escript`, use
+`EARLING_STATIC_ONLY=1 make verify` for the static guard checks.
 Make targets resolve repository tools from the loaded Makefile, so an absolute
 Makefile path can be used from another working directory.
 GitHub Actions runs the static portion of `make check` through
 `.github/workflows/check.yml` on pushes, pull requests, and manual dispatches.
 The workflow pins checkout by commit on Ubuntu 24.04, disables checkout
 credential persistence, grants read-only repository access, and uses
-`EARLING_STATIC_ONLY=1` with a five-minute timeout so runner image changes
-cannot silently select an unqualified Erlang release. It does not claim Erlang
-runtime compatibility; full rebar tests still require a locally installed,
-compatible Erlang/OTP.
+`EARLING_STATIC_ONLY=1` with a five-minute timeout. It installs Erlang only for
+the standalone security EUnit suite; it does not claim the bundled rebar
+archive or complete legacy dependency graph is OTP 29 compatible.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -140,7 +157,11 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.
 - Frame length prefixes are digit-bounded before integer parsing.
 - Polling JSONP callback indexes are validated and length-bounded before
-  response construction.
+  session creation and response construction.
+- Session lookup and dispatch require the canonical request Origin to match the
+  session creator's identity.
+- Session IDs, POST lengths, and transfer encodings are bounded before ETS or
+  body-parser work.
 - This code targets old Socket.IO clients. Do not present it as a modern
   production Socket.IO server without a protocol and security review.
 

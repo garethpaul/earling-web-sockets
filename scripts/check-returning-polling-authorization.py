@@ -24,8 +24,8 @@ for start, end, dispatch in routes:
         "case authorize_session_request(Req, State) of",
         "false ->",
         '405, "unauthorized"',
-        "true ->",
-        "case ets:lookup(Sessions, SessionId) of",
+        "{ok, RequestOrigin} ->",
+        "owned_session(Sessions, SessionId, RequestOrigin)",
         dispatch,
         '404, ""',
         "{noreply, State}",
@@ -35,7 +35,7 @@ for start, end, dispatch in routes:
             raise SystemExit(f"{start} must contain one {contract!r}.")
     if not all(handler.index(a) < handler.index(b) for a, b in zip(contracts, contracts[1:])):
         raise SystemExit(
-            f"{start} must authorize before session lookup and preserve dispatch/404 flow."
+            f"{start} must authorize and verify session ownership before dispatch."
         )
 
 print("Returning polling authorization checks passed.")

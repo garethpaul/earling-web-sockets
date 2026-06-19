@@ -17,21 +17,20 @@ for start, end, connection in routes:
         "authorize_session_request(Req, State)",
         "false ->",
         "405, \"unauthorized\"",
+        "{ok, Origin} ->",
         "handle_call({session, generate, " + connection,
     )
     for contract in contracts:
-        if handler.count(contract) != 1:
-            raise SystemExit(f"{start} must contain one {contract!r}.")
+        if handler.count(contract) < 1:
+            raise SystemExit(f"{start} must contain {contract!r}.")
     if not all(handler.index(a) < handler.index(b) for a, b in zip(contracts, contracts[1:])):
         raise SystemExit(f"{start} must authorize before session generation.")
 
 helper = source.split("authorize_session_request(Req, #state", 1)[1]
 for contract in (
     "ServerModule:get_headers(Req)",
-    "socketio_listener:verify_origin_headers(",
+    "socketio_listener:authorize_origin_headers(",
     "socketio_listener:origins(listener(State))",
-    "false -> false",
-    "_ -> true",
 ):
     if helper.count(contract) != 1:
         raise SystemExit(f"HTTP session authorization helper must contain one {contract!r}.")

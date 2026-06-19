@@ -26,6 +26,10 @@ Evidence status: not run
 | 12 | Malformed and oversized frames | Synthetic client | Payload class, decode result, process-liveness result, and error class | not run |
 | 13 | HTTP demo lifecycle | Local demo | Bind class, startup result, request result, shutdown result, and restart result | not run |
 | 14 | SSL demo fixture boundary | Local demo | Test-fixture identity, handshake result, warning class, and shutdown result | not run |
+| 15 | Cross-Origin session reuse | Synthetic client | Creator Origin class, second allowed Origin class, lookup result, and session count delta | not run |
+| 16 | Session identifier bounds | HTTP route | Identifier class, lookup result, response class, and process-liveness result | not run |
+| 17 | POST resource bounds | HTTP route | Length/transfer class, parser-call count, response class, and process-liveness result | not run |
+| 18 | JSONP preallocation bounds | HTTP route | Callback-index class, response class, and session count delta | not run |
 
 ## Evidence Rules
 
@@ -41,4 +45,8 @@ Evidence status: not run
   test-only fixtures and cannot establish production TLS suitability.
 
 No Erlang compile, EUnit, transport client, HTTP demo, SSL demo, or browser
-scenario was executed for this documentation-only change.
+scenario was executed for the complete legacy application. On Erlang/OTP 29,
+the bundled 2012 `rebar` archive fails to load before dependency fetching or
+compilation. The dependency-free `socketio_request_security` module does
+compile on OTP 29 and its focused EUnit suite is recorded separately in the
+2026-06-19 authorization/resource-boundary review plan.

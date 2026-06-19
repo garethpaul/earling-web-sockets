@@ -26,8 +26,9 @@ contracts = (
     "case authorize_session_request(Req, State) of",
     "false ->",
     '405, "unauthorized"',
-    "true ->",
-    "case ets:lookup(Sessions, SessionId) of",
+    "{ok, RequestOrigin} ->",
+    "owned_session(Sessions, SessionId, RequestOrigin)",
+    "socketio_request_security:post_body_status(ServerModule:get_headers(Req))",
     "gen_server:call(Pid, {Transport, data, Req})",
     '404, ""',
 )
@@ -35,6 +36,6 @@ for contract in contracts:
     if helper.count(contract) != 1:
         raise SystemExit(f"Session data helper must contain one {contract!r}.")
 if not all(helper.index(a) < helper.index(b) for a, b in zip(contracts, contracts[1:])):
-    raise SystemExit("Session data helper must authorize before lookup and dispatch.")
+    raise SystemExit("Session data helper must authorize, verify ownership, and bound the body before dispatch.")
 
 print("Session data authorization checks passed.")

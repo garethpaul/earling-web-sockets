@@ -25,5 +25,13 @@ jobs:
       - name: Verify OpenSSL availability
         run: openssl version
 
+      - name: Install Erlang runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes erlang-base erlang-dev erlang-eunit
+
+      - name: Run executable Erlang security tests
+        run: make security-test
+
       - name: Run static maintenance baseline
         run: EARLING_STATIC_ONLY=1 make check

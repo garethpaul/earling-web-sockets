@@ -19,6 +19,15 @@ prepare_case() {
   cp "$ROOT_DIR/demo/demo_ssl.erl" "$CASE_DIR/demo/"
 }
 
+replace_in_file() {
+  expression=$1
+  path=$2
+  temporary="$path.tmp"
+  sed "$expression" "$path" >"$temporary"
+  cat "$temporary" >"$path"
+  rm -f "$temporary"
+}
+
 assert_rejected() {
   label=$1
   expected=$2
@@ -64,15 +73,15 @@ fi
 assert_rejected key-replacement "do not match"
 
 prepare_case password-drift
-sed -i 's/{password, "misultin"}/{password, "changed"}/' "$CASE_DIR/demo/demo_ssl.erl"
+replace_in_file 's/{password, "misultin"}/{password, "changed"}/' "$CASE_DIR/demo/demo_ssl.erl"
 assert_rejected password-drift "reviewed test-fixture password"
 
 prepare_case encryption-marker-removal
-sed -i '/^Proc-Type: 4,ENCRYPTED$/d' "$CASE_DIR/demo/test_privkey.pem"
+replace_in_file '/^Proc-Type: 4,ENCRYPTED$/d' "$CASE_DIR/demo/test_privkey.pem"
 assert_rejected encryption-marker-removal "remain encrypted PEM material"
 
 prepare_case wrong-key-password
-sed -i 's/FIXTURE_PASSWORD=misultin/FIXTURE_PASSWORD=changed/' \
+replace_in_file 's/FIXTURE_PASSWORD=misultin/FIXTURE_PASSWORD=changed/' \
   "$CASE_DIR/scripts/check-demo-tls-fixture.sh"
 assert_rejected wrong-key-password "cannot be opened"
 

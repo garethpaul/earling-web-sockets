@@ -30,7 +30,8 @@ Priority:
 Current baseline:
 
 - The legacy browser client is the only submodule and remains fixed to its
-  canonical `priv/Socket.IO` path, LearnBoost HTTPS URL, and `06` branch.
+  canonical `priv/Socket.IO` path, LearnBoost HTTPS URL, and exact peeled `0.6`
+  tag commit `7a5197c1e74d1f3a050b330e41e4b6e63afb209c`.
 - `make deps`, `make`, and `make test` now verify `erl` and `escript` before
   invoking legacy `rebar`.
 - Keep location-independent Make targets rooted to the loaded repository
@@ -50,6 +51,12 @@ Current baseline:
 - Polling POST bodies are parsed and decoded only after Origin authorization.
 - XHR multipart POST bodies reject disallowed origins before parsing or decode.
 - HTMLFile POST bodies reject disallowed origins before parsing or decode.
+- Bind sessions to their canonical creating Origin, validate UUIDv4 session
+  identifiers before ETS access, and reject mismatched allowed Origins.
+- Bound transport POST bodies and validate JSONP callback indexes before body
+  parsing or session creation.
+- Keep standalone security EUnit tests runnable on current Erlang while
+  documenting that the bundled 2012 rebar archive cannot load on OTP 29.
 - Malformed Socket.IO frame input fails closed instead of crashing transport
   decode paths.
 - Socket.IO frame bodies are capped at 1 MiB before payload splitting.

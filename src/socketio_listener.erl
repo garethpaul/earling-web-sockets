@@ -11,7 +11,7 @@
 -export([start/1, server/1]).
 -export([start_link/2]).
 -export([event_manager/1, origins/1, origins/2]).
--export([verify_origin/2, verify_origin_headers/2]).
+-export([verify_origin/2, verify_origin_headers/2, authorize_origin_headers/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -64,20 +64,29 @@ origins(Server, Origins) ->
     gen_server:call(Server, {origins, Origins}).
 
 verify_origin_headers(Headers, Origins) ->
+    case authorize_origin_headers(Headers, Origins) of
+        {ok, undefined} -> undefined;
+        {ok, _Origin} -> true;
+        false -> false
+    end.
+
+authorize_origin_headers(Headers, Origins) ->
     case origin_header_values(Headers) of
         [] ->
-            undefined;
+            {ok, undefined};
         [Origin] when is_list(Origin), Origin =/= [] ->
             case lists:member($,, Origin) of
                 true -> false;
-                false -> verify_origin(Origin, Origins)
+                false -> authorize_origin(Origin, Origins)
             end;
         _ ->
             false
     end.
 
-origin_header_values(Headers) ->
-    [Value || {Name, Value} <- Headers, origin_header_name(Name)].
+origin_header_values(Headers) when is_list(Headers) ->
+    [Value || {Name, Value} <- Headers, origin_header_name(Name)];
+origin_header_values(_Headers) ->
+    [invalid].
 
 origin_header_name(Name) when is_atom(Name) ->
     string:to_lower(atom_to_list(Name)) =:= "origin";
@@ -92,6 +101,12 @@ origin_header_name(_) ->
     false.
 
 verify_origin(Origin, Origins) ->
+    case authorize_origin(Origin, Origins) of
+        {ok, _Identity} -> true;
+        false -> false
+    end.
+
+authorize_origin(Origin, Origins) ->
     case catch ex_uri:decode(Origin) of
         {ok, #ex_uri{
                 scheme = Scheme,
@@ -109,7 +124,11 @@ verify_origin(Origin, Origins) ->
                 false ->
                     false;
                 OriginPort ->
-                    verify_origin_1({Host, OriginPort}, Origins)
+                    NormalizedHost = string:to_lower(Host),
+                    case verify_origin_1({NormalizedHost, OriginPort}, Origins) of
+                        true -> {ok, {string:to_lower(Scheme), NormalizedHost, OriginPort}};
+                        false -> false
+                    end
             end;
         _ ->
             false

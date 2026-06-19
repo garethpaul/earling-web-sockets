@@ -1,5 +1,20 @@
 # Changes
 
+## 2026-06-19
+
+- Bound each Socket.IO session to the canonical Origin identity that created
+  it so a different allow-listed Origin cannot reuse a known session ID.
+- Rejected non-canonical UUIDv4 session IDs before ETS lookup and validated
+  JSONP callback indexes before allocating sessions.
+- Required a single decimal transport POST Content-Length capped at 1 MiB and
+  rejected transfer encodings before legacy body parsing.
+- Replaced the nonexistent mutable `06` submodule branch claim with the exact
+  peeled Socket.IO `0.6` gitlink
+  `7a5197c1e74d1f3a050b330e41e4b6e63afb209c`.
+- Added dependency-free Erlang security EUnit tests and documented that the
+  bundled 2012 rebar archive cannot load on Erlang/OTP 29.
+- Made the OpenSSL TLS fixture mutation suite portable across BSD and GNU sed.
+
 ## 2026-06-17
 
 - Added OpenSSL-backed integrity checks for the encrypted demo TLS fixture pair,

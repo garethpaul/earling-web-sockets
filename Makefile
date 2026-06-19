@@ -1,4 +1,4 @@
-.PHONY: all deps compile lint test verify check check-tools force
+.PHONY: all deps compile lint test security-test verify check check-tools force
 
 ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
@@ -17,12 +17,19 @@ compile: deps
 test: check-tools force
 	@"$(ROOT)/rebar" eunit skip_deps=true
 
+security-test: check-tools
+	@tmp=$$(mktemp -d "$${TMPDIR:-/tmp}/earling-security.XXXXXX"); \
+	trap 'rm -rf -- "$$tmp"' EXIT HUP INT TERM; \
+	erlc -o "$$tmp" "$(ROOT)/src/socketio_request_security.erl" "$(ROOT)/test/socketio_request_security_tests.erl"; \
+	erl -noshell -pa "$$tmp" -eval 'case eunit:test(socketio_request_security_tests, [verbose]) of ok -> halt(0); _ -> halt(1) end.'
+
 lint: verify
 
 verify:
 	@"$(ROOT)/scripts/check-baseline.sh"
+	@python3 "$(ROOT)/tests/check-security-boundaries.py"
 
-check: verify
+check: verify security-test
 
 force:
 	@true

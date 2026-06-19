@@ -44,6 +44,11 @@
 - New HTTP transport requests authorize Origin headers before creating sessions.
 - Returning polling GET requests authorize Origin headers before session lookup or transport dispatch.
 - Session data POST requests authorize Origin headers before session lookup or transport dispatch.
+- Returning polling and session-data requests must match the canonical Origin
+  identity stored when the session was created.
+- Validate canonical UUIDv4 session IDs before ETS lookup, validate JSONP
+  indexes before session creation, and reject POSTs above 1 MiB or without one
+  valid decimal Content-Length before body parsing.
 
 - The SSL demo certificate and private key are checked in for local testing only.
 - The only tracked certificate/key files are `demo/test_certificate.pem` and `demo/test_privkey.pem`; both are test-only local demo fixtures.
@@ -54,6 +59,9 @@
   test password, and matching public keys; run the OpenSSL-backed fixture tests
   when either demo credential file or `demo/demo_ssl.erl` changes.
 - The default listener origin configuration in the legacy supervisor allows broad origins unless callers provide a narrower `origins` option.
+- The bundled 2012 rebar archive cannot load on Erlang/OTP 29. Use
+  `make security-test` for the dependency-free executable suite and reserve
+  full `make test` claims for a compatible legacy OTP environment.
 - Malformed or relative Origin values are rejected before transport handlers apply the configured origin allow-list.
 - Origin header verification must reject duplicate, empty, non-list, and comma-joined values before CORS headers are emitted.
 - Origin header names must be matched case-insensitively without creating atoms

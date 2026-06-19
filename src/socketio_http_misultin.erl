@@ -90,8 +90,8 @@ handle_websocket_1(Server, Resource, ["websocket"|Resource], Ws) ->
     case gen_server:call(Server, {websocket, authorize, Headers}) of
         false ->
             ignore;
-        _ ->
-            {SessionID, Pid} = gen_server:call(Server, {session, generate, {websocket, Ws}, socketio_transport_websocket}),
+        {ok, Origin} ->
+            {SessionID, Pid} = gen_server:call(Server, {session, generate, {websocket, Ws}, socketio_transport_websocket, Origin}),
             handle_websocket(Server, Ws, SessionID, Pid)
     end;
 handle_websocket_1(_Server, _Resource, _WsResource, _Ws) ->

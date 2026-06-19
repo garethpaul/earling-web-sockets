@@ -46,8 +46,9 @@ Helpful reports include:
   24.04 with pinned checkout, disabled credential persistence, read-only
   repository access, and a five-minute timeout.
 - The static baseline permits exactly one submodule: `priv/Socket.IO` at the
-  canonical LearnBoost HTTPS URL and legacy `06` branch. URL, path, branch,
-  section, and option drift are rejected.
+  canonical LearnBoost HTTPS URL and exact reviewed `0.6` gitlink
+  `7a5197c1e74d1f3a050b330e41e4b6e63afb209c`. URL, path, section, option, and
+  gitlink drift are rejected; the upstream repository has no `06` branch.
 - Runtime compatibility, transport, and demo-server claims require the
   exact-head runtime verification matrix. The tracked demo certificate and
   private key are test-only fixtures and cannot establish production TLS
@@ -74,10 +75,23 @@ XHR multipart POST bodies follow the same fail-closed ordering and return the
 legacy unauthorized response before parsing disallowed requests.
 HTMLFile POST bodies also authorize first and return the legacy unauthorized
 response without parsing or decoding disallowed requests.
+Authorized sessions are owned by the canonical Origin identity that created
+them. A different allow-listed Origin cannot reuse a known session ID for
+returning polling or POST dispatch. Session IDs must be canonical lowercase
+UUIDv4 values before ETS lookup.
+
+Transport POSTs require exactly one decimal `Content-Length` no larger than
+1 MiB. Duplicate/malformed lengths and transfer encodings fail before the
+legacy body parser. JSONP callback indexes fail before session allocation.
 
 Socket.IO frame bodies are capped at 1 MiB before payload splitting so
 oversized declared frame lengths fail closed during decode.
 Socket.IO frame length prefixes are digit-bounded before integer parsing.
+
+The bundled 2012 rebar archive is not loadable by Erlang/OTP 29. Hosted checks
+therefore execute the dependency-free request-boundary EUnit suite and static
+contracts, while the historical full compile/EUnit path remains a separately
+documented legacy-runtime requirement.
 
 ## Dependency and Supply Chain Security
 
