@@ -386,12 +386,12 @@ done
 
 if ! grep -Fq "command -v erl" "$MAKEFILE" ||
   ! grep -Fq "command -v escript" "$MAKEFILE" ||
-  ! grep -Fq 'ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))' "$MAKEFILE" ||
+  ! grep -Fq 'override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))' "$MAKEFILE" ||
   [ "$(grep -Fc '"$(ROOT)/rebar"' "$MAKEFILE")" -ne 3 ] ||
   [ "$(grep -Fc '"$(ROOT)/scripts/check-baseline.sh"' "$MAKEFILE")" -ne 1 ] ||
   ! grep -Fq "lint: verify" "$MAKEFILE" ||
   ! grep -Fq "check: verify" "$MAKEFILE"; then
-  printf '%s\n' "Makefile must preflight Erlang erl/escript before rebar targets and expose make lint/check." >&2
+  printf '%s\n' "Makefile must protect its repository root, preflight Erlang erl/escript before rebar targets, and expose make lint/check." >&2
   exit 1
 fi
 

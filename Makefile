@@ -1,6 +1,6 @@
 .PHONY: all deps compile lint test security-test verify check check-tools force
 
-ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 all: compile
 
