@@ -55,6 +55,8 @@
 - Do not commit production certificates, private keys, tokens, or local rebar dependency caches.
 - Build outputs such as `ebin`, `.eunit`, `deps`, logs, and the populated `priv/Socket.IO` submodule checkout should stay untracked.
 - Make targets resolve repository tools from the loaded Makefile and must remain usable from external working directories.
+- Keep Make verification authoritative: reject additional `-f` files, preloaded
+  Makefiles, caller `MAKEFLAGS`, and non-executing or error-ignoring modes.
 - The demo TLS fixtures must retain the reviewed fingerprint, encrypted key,
   test password, and matching public keys; run the OpenSSL-backed fixture tests
   when either demo credential file or `demo/demo_ssl.erl` changes.

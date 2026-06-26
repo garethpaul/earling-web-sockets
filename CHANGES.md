@@ -1,5 +1,67 @@
 # Changes
 
+## 2026-06-26 14:03:01 PDT - P1 - Make repository verification authoritative
+
+### Summary
+
+Closed a false-green verification boundary where a later `-f` Makefile could
+replace every public leaf recipe, or GNU Make execution modes could suppress or
+ignore the repository-owned security commands.
+
+### Work completed
+
+- Converted public targets to guarded double-colon rules with a repository
+  authority prerequisite.
+- Rejected later single-colon replacement, later double-colon append,
+  preloaded Makefiles, caller invocation variables, and ten non-executing or
+  error-ignoring modes.
+- Rooted commands to the first reviewed Makefile instead of the last loaded
+  file and preserved external-directory execution.
+- Added three executable Make authority regressions to `make verify`.
+- Extended the shell baseline and repository guidance with the reviewed
+  invocation contract.
+
+### Threads
+
+- None; the focused Make authority work was completed directly.
+
+### Files changed
+
+- `Makefile` — own public target execution and reject unsafe invocation modes.
+- `tests/test-makefile-root.py` — cover replacement, append, mode, and caller
+  variable attacks.
+- `scripts/check-baseline.sh` — freeze the Make authority implementation,
+  regressions, plan evidence, and guidance.
+- `README.md`, `SECURITY.md`, `VISION.md`, `AGENTS.md`, and
+  `docs/plans/2026-06-26-make-invocation-authority.md` — document behavior and
+  completed evidence.
+
+### Validation
+
+- Full static baseline, executable security boundary checks, Make authority
+  suite, external-directory gate, and repository hygiene audits — recorded in
+  the completed plan.
+
+### Bugs / findings
+
+- Fixed P1 false-green verification through later Makefile recipe replacement.
+- Fixed P1 false-green verification through dry-run, touch, question, and
+  ignore-error modes.
+- Socket.IO protocol, transport, Origin authorization, session ownership,
+  request limits, dependency, submodule, and demo TLS behavior did not change.
+
+### Blockers
+
+- The bundled 2012 rebar archive remains incompatible with Erlang/OTP 29; this
+  verification-only change does not broaden legacy runtime claims.
+- Codex review authentication is unavailable in this environment; attempt it
+  once after the pull request is open, then rely on local and hosted gates.
+
+### Next action
+
+- Merge only the exact hosted-green pull-request head, then continue repository
+  triage.
+
 ## 2026-06-19
 
 - Bound each Socket.IO session to the canonical Origin identity that created

@@ -120,6 +120,9 @@ historical full compile/EUnit path. Without `erl`/`escript`, use
 `EARLING_STATIC_ONLY=1 make verify` for the static guard checks.
 Make targets resolve repository tools from the loaded Makefile, so an absolute
 Makefile path can be used from another working directory.
+Repository verification requires this Makefile alone. Additional `-f` files,
+preloaded Makefiles, caller `MAKEFLAGS`, and non-executing or error-ignoring
+modes fail closed before any checker, rebar, or Erlang command runs.
 GitHub Actions runs the static portion of `make check` through
 `.github/workflows/check.yml` on pushes, pull requests, and manual dispatches.
 The workflow pins checkout by commit on Ubuntu 24.04, disables checkout
