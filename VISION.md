@@ -36,6 +36,8 @@ Current baseline:
   invoking legacy `rebar`.
 - Keep location-independent Make targets rooted to the loaded repository
   Makefile for checker and bundled rebar invocation.
+- Keep the Make entry point isolated from later recipe replacement and
+  false-green Make modes that suppress execution or ignore errors.
 - `scripts/check-baseline.sh` runs full rebar tests when Erlang/OTP is
   available and static maintenance checks otherwise.
 - Malformed or relative Origin values fail closed instead of crashing listener

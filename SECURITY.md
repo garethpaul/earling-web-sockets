@@ -45,6 +45,9 @@ Helpful reports include:
 - GitHub Actions runs the static maintenance `make check` baseline on Ubuntu
   24.04 with pinned checkout, disabled credential persistence, read-only
   repository access, and a five-minute timeout.
+- Invoke repository verification with this Makefile alone. Additional `-f` files,
+  preloaded Makefiles, caller `MAKEFLAGS`, and non-executing or
+  error-ignoring modes fail closed before security gates run.
 - The static baseline permits exactly one submodule: `priv/Socket.IO` at the
   canonical LearnBoost HTTPS URL and exact reviewed `0.6` gitlink
   `7a5197c1e74d1f3a050b330e41e4b6e63afb209c`. URL, path, section, option, and

@@ -26,6 +26,7 @@ ORIGIN_HEADER_NAME_PLAN="$ROOT_DIR/docs/plans/2026-06-15-001-origin-header-name-
 SUBMODULE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-socketio-submodule-identity.md"
 POLLING_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-13-polling-authorization-order.md"
 LOCATION_MAKE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-location-independent-make.md"
+MAKE_AUTHORITY_PLAN="$ROOT_DIR/docs/plans/2026-06-26-make-invocation-authority.md"
 XHR_MULTIPART_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-xhr-multipart-authorization-order.md"
 HTMLFILE_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-htmlfile-authorization-order.md"
 WEBSOCKET_AUTH_PLAN="$ROOT_DIR/docs/plans/2026-06-14-websocket-origin-authorization.md"
@@ -45,6 +46,7 @@ RETURNING_POLLING_AUTH_CHECK="$ROOT_DIR/scripts/check-returning-polling-authoriz
 SESSION_DATA_AUTH_CHECK="$ROOT_DIR/scripts/check-session-data-authorization.py"
 TLS_FIXTURE_CHECK="$ROOT_DIR/scripts/check-demo-tls-fixture.sh"
 TLS_FIXTURE_TEST="$ROOT_DIR/tests/check-demo-tls-fixture.sh"
+MAKE_AUTHORITY_TEST="$ROOT_DIR/tests/test-makefile-root.py"
 ORIGIN_HEADER_NAME_CHECK="$ROOT_DIR/scripts/check-origin-header-name-normalization.py"
 LISTENER="$ROOT_DIR/src/socketio_listener.erl"
 LISTENER_TESTS="$ROOT_DIR/test/socketio_listener_tests.erl"
@@ -91,6 +93,7 @@ for path in \
   "docs/plans/2026-06-13-socketio-submodule-identity.md" \
   "docs/plans/2026-06-13-polling-authorization-order.md" \
   "docs/plans/2026-06-13-location-independent-make.md" \
+  "docs/plans/2026-06-26-make-invocation-authority.md" \
   "scripts/check-polling-authorization-order.py" \
   "docs/plans/2026-06-14-xhr-multipart-authorization-order.md" \
   "scripts/check-xhr-multipart-authorization-order.py" \
@@ -110,6 +113,7 @@ for path in \
   "scripts/check-demo-tls-fixture.sh" \
   "tests/check-demo-tls-fixture.sh" \
   "tests/check-security-boundaries.py" \
+  "tests/test-makefile-root.py" \
   "scripts/check-origin-header-name-normalization.py" \
   "docs/plans/2026-06-08-earling-check-wrapper.md" \
   "docs/plans/2026-06-08-earling-websocket-heartbeat-timers.md" \
@@ -386,14 +390,50 @@ done
 
 if ! grep -Fq "command -v erl" "$MAKEFILE" ||
   ! grep -Fq "command -v escript" "$MAKEFILE" ||
-  ! grep -Fq 'override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))' "$MAKEFILE" ||
+  ! grep -Fq '.PHONY: __repository-make-authority all deps compile lint test security-test verify check check-tools force' "$MAKEFILE" ||
+  ! grep -Fq '.SECONDEXPANSION:' "$MAKEFILE" ||
+  ! grep -Fq '$(error MAKEFLAGS must not be overridden for repository verification)' "$MAKEFILE" ||
+  ! grep -Fq '$(error non-executing or error-ignoring MAKEFLAGS are not supported for repository verification)' "$MAKEFILE" ||
+  ! grep -Fq '$(error MAKEFILES must be empty; repository verification requires this Makefile to be loaded alone)' "$MAKEFILE" ||
+  ! grep -Fq 'override REPOSITORY_MAKEFILE := $(value MAKEFILE_LIST)' "$MAKEFILE" ||
+  ! grep -Fq 'override EXPECTED_MAKEFILE_LIST := $(value MAKEFILE_LIST)' "$MAKEFILE" ||
+  ! grep -Fq 'override CURRENT_MAKEFILE_LIST = $(value MAKEFILE_LIST)' "$MAKEFILE" ||
+  ! grep -Fq 'override ROOT := $(shell path=' "$MAKEFILE" ||
+  ! grep -Fq 'all deps compile lint test security-test verify check check-tools force:: __repository-make-authority' "$MAKEFILE" ||
+  ! grep -Fq '__repository-make-authority::' "$MAKEFILE" ||
+  ! grep -Fq 'multiple -f Makefiles are not supported' "$MAKEFILE" ||
   [ "$(grep -Fc '"$(ROOT)/rebar"' "$MAKEFILE")" -ne 3 ] ||
   [ "$(grep -Fc '"$(ROOT)/scripts/check-baseline.sh"' "$MAKEFILE")" -ne 1 ] ||
-  ! grep -Fq "lint: verify" "$MAKEFILE" ||
-  ! grep -Fq "check: verify" "$MAKEFILE"; then
-  printf '%s\n' "Makefile must protect its repository root, preflight Erlang erl/escript before rebar targets, and expose make lint/check." >&2
+  [ "$(grep -Fc '"$(ROOT)/tests/test-makefile-root.py"' "$MAKEFILE")" -ne 1 ] ||
+  ! grep -Fq "lint:: verify" "$MAKEFILE" ||
+  ! grep -Fq "check:: verify security-test" "$MAKEFILE"; then
+  printf '%s\n' "Makefile must own its invocation, protect its repository root, preflight Erlang erl/escript, and expose authoritative lint/check gates." >&2
   exit 1
 fi
+
+for contract in \
+  "test_later_makefile_cannot_replace_or_append_public_recipes" \
+  "test_non_executing_and_error_ignoring_modes_fail_closed" \
+  "test_make_invocation_variable_overrides_fail_closed"; do
+  if ! grep -Fq "$contract" "$MAKE_AUTHORITY_TEST"; then
+    printf '%s\n' "Make authority regression suite is missing: $contract" >&2
+    exit 1
+  fi
+done
+
+for contract in \
+  "status: completed" \
+  "single-colon replacement" \
+  "double-colon append" \
+  "ten non-executing or error-ignoring modes" \
+  "EARLING_STATIC_ONLY=1 make check" \
+  "external working directory" \
+  "protocol behavior was unchanged"; do
+  if ! grep -Fq "$contract" "$MAKE_AUTHORITY_PLAN"; then
+    printf '%s\n' "Make invocation authority plan must retain completed evidence: $contract" >&2
+    exit 1
+  fi
+done
 
 if ! grep -Fq "status: completed" "$LOCATION_MAKE_PLAN" ||
   ! grep -Fq "external working directory" "$LOCATION_MAKE_PLAN" ||
@@ -406,8 +446,11 @@ fi
 if ! grep -Fq "absolute" "$README" ||
   ! grep -Fq "Makefile path" "$README" ||
   ! grep -Fq "location-independent Make targets" "$VISION" ||
+  ! grep -Fq "false-green Make modes" "$VISION" ||
   ! grep -Fq "Rooted Make targets" "$ROOT_DIR/CHANGES.md" ||
-  ! grep -Fq "Make targets resolve repository tools" "$ROOT_DIR/AGENTS.md"; then
+  ! grep -Fq "Make targets resolve repository tools" "$ROOT_DIR/AGENTS.md" ||
+  ! grep -Fq 'Additional `-f` files' "$README" ||
+  ! grep -Fq 'Additional `-f` files' "$SECURITY"; then
   printf '%s\n' "Project guidance must document location-independent Make verification." >&2
   exit 1
 fi
