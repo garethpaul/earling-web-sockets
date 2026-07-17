@@ -69,8 +69,8 @@ test:: check-tools force
 security-test:: check-tools
 	@tmp=$$(mktemp -d "$${TMPDIR:-/tmp}/earling-security.XXXXXX"); \
 	trap 'rm -rf -- "$$tmp"' EXIT HUP INT TERM; \
-	erlc -o "$$tmp" "$(ROOT)/src/socketio_request_security.erl" "$(ROOT)/test/socketio_request_security_tests.erl"; \
-	erl -noshell -pa "$$tmp" -eval 'case eunit:test(socketio_request_security_tests, [verbose]) of ok -> halt(0); _ -> halt(1) end.'
+	erlc -I "$(ROOT)/include" -o "$$tmp" "$(ROOT)/src/socketio_request_security.erl" "$(ROOT)/test/socketio_request_security_tests.erl" "$(ROOT)/src/socketio_data.erl" "$(ROOT)/test/socketio_data_frame_length_tests.erl" && \
+	erl -noshell -pa "$$tmp" -eval 'case eunit:test([socketio_request_security_tests, socketio_data_frame_length_tests], [verbose]) of ok -> halt(0); _ -> halt(1) end.'
 
 lint:: verify
 
