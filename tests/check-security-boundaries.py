@@ -8,6 +8,7 @@ HTTP = (ROOT / "src/socketio_http.erl").read_text()
 MISULTIN = (ROOT / "src/socketio_http_misultin.erl").read_text()
 WORKFLOW = (ROOT / ".github/workflows/check.yml").read_text()
 TLS_TEST = (ROOT / "tests/check-demo-tls-fixture.sh").read_text()
+MAKEFILE_SOURCE = (ROOT / "Makefile").read_text()
 
 
 def require_order(source: str, first: str, second: str, label: str) -> None:
@@ -58,6 +59,44 @@ if "{session, generate, {websocket, Ws}, socketio_transport_websocket, Origin}" 
 
 if "Run executable Erlang security tests" not in WORKFLOW:
     raise SystemExit("hosted workflow must execute the Erlang security tests")
+
+# A step name proves nothing about what the step runs: the name above stays
+# satisfied when the recipe is replaced with `run: 'true'`, which silently
+# deletes every executable Erlang test from CI. Pin the command itself.
+# `make security-test` is the only path that executes Erlang in the hosted job,
+# because `make test` is skipped under EARLING_STATIC_ONLY=1.
+if "run: make security-test" not in WORKFLOW:
+    raise SystemExit(
+        "hosted workflow must invoke `make security-test`, not merely name the step"
+    )
+
+# Pin the eunit modules `make security-test` dispatches, so the executable
+# fixtures cannot be dropped from the recipe silently. Comment lines are stripped
+# first: a commented-out mention would otherwise satisfy these substrings while
+# the live recipe ran fewer modules. This is a tripwire against silent removal,
+# not a proof of execution -- source text cannot establish that. The load-bearing
+# guarantee is that the fixtures below fail when the bound they assert moves.
+MAKEFILE_EFFECTIVE = "\n".join(
+    line
+    for line in MAKEFILE_SOURCE.splitlines()
+    if not line.strip().lstrip("@-").startswith("#")
+)
+
+for required in (
+    '"$(ROOT)/test/socketio_request_security_tests.erl"',
+    '"$(ROOT)/test/socketio_data_frame_length_tests.erl"',
+):
+    if required not in MAKEFILE_EFFECTIVE:
+        raise SystemExit(f"make security-test must compile {required}")
+
+if (
+    "eunit:test([socketio_request_security_tests, socketio_data_frame_length_tests]"
+    not in MAKEFILE_EFFECTIVE
+):
+    raise SystemExit(
+        "make security-test must dispatch both eunit modules: the Socket.IO frame "
+        "body bound is verified nowhere else in the hosted job"
+    )
 
 if "sed -i" in TLS_TEST:
     raise SystemExit("TLS regression tests must not use non-portable sed -i")
